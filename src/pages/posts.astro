@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('posts', ({ data }) => {
+  return import.meta.env.PROD ? !data.draft : true;
+});
+
+posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<BaseLayout title="文章 | Kraken">
+  <div style="padding: 3rem 0;">
+    <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 3rem;">文章</h1>
+    
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      {posts.map(post => (
+        <article style="padding: 1.5rem 0; border-bottom: 1px solid var(--border);">
+          <div style="display: flex; gap: 1rem; align-items: baseline; flex-wrap: wrap; margin-bottom: 0.5rem;">
+            <a 
+              href={`/posts/${post.slug}`}
+              style="font-size: 1.5rem; font-weight: 600; color: var(--text); text-decoration: none;"
+            >
+              {post.data.title}
+            </a>
+            <time style="color: #666; font-size: 0.875rem;">
+              {post.data.pubDate.toLocaleDateString('zh-CN')}
+            </time>
+          </div>
+          
+          <p style="color: #888; margin-bottom: 0.75rem; line-height: 1.6;">
+            {post.data.description}
+          </p>
+          
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            {post.data.tags.map(tag => (
+              <span style="padding: 0.25rem 0.75rem; background: var(--secondary); border-radius: 9999px; font-size: 0.75rem; color: #888;">
+                {tag}
+              </span>
+            ))}
+          </div>
+        </article>
+      ))}
+    </div>
+    
+    {posts.length === 0 && (
+      <p style="color: #666; text-align: center; padding: 4rem 0;">暂无文章</p>
+    )}
+  </div>
+</BaseLayout>

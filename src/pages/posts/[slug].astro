@@ -1,0 +1,127 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+---
+
+<BaseLayout title={`${post.data.title} | Kraken`}>
+  <article style="padding: 3rem 0; max-width: 800px;">
+    <header style="margin-bottom: 3rem;">
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+        {post.data.tags.map(tag => (
+          <span style="padding: 0.25rem 0.75rem; background: var(--secondary); border-radius: 9999px; font-size: 0.75rem; color: #888;">
+            {tag}
+          </span>
+        ))}
+      </div>
+      
+      <h1 style="font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 1rem;">
+        {post.data.title}
+      </h1>
+      
+      <div style="color: #666; font-size: 0.875rem;">
+        <time>{post.data.pubDate.toLocaleDateString('zh-CN')}</time>
+        {post.data.updatedDate && (
+          <span> · 更新于 {post.data.updatedDate.toLocaleDateString('zh-CN')}</span>
+        )}
+      </div>
+    </header>
+    
+    <div class="prose">
+      <Content />
+    </div>
+    
+    <footer style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+      <a href="/posts" style="color: var(--accent); text-decoration: none;">← 返回文章列表</a>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .prose {
+    font-size: 1.125rem;
+    line-height: 1.8;
+    color: #ccc;
+  }
+  
+  .prose :global(h2) {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 2.5rem 0 1rem;
+    color: var(--text);
+  }
+  
+  .prose :global(h3) {
+    font-size: 1.375rem;
+    font-weight: 600;
+    margin: 2rem 0 0.75rem;
+    color: var(--text);
+  }
+  
+  .prose :global(p) {
+    margin: 1.25rem 0;
+  }
+  
+  .prose :global(ul), .prose :global(ol) {
+    margin: 1.25rem 0;
+    padding-left: 1.5rem;
+  }
+  
+  .prose :global(li) {
+    margin: 0.5rem 0;
+  }
+  
+  .prose :global(code) {
+    padding: 0.2rem 0.4rem;
+    background: var(--secondary);
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.875em;
+  }
+  
+  .prose :global(pre) {
+    padding: 1rem;
+    background: #161616;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+  
+  .prose :global(pre code) {
+    padding: 0;
+    background: none;
+  }
+  
+  .prose :global(blockquote) {
+    border-left: 3px solid var(--accent);
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+    color: #888;
+    font-style: italic;
+  }
+  
+  .prose :global(a) {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  
+  .prose :global(a:hover) {
+    text-decoration: underline;
+  }
+  
+  .prose :global(hr) {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+</style>

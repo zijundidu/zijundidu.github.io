@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout>
+  <div style="min-height: calc(100vh - 200px); display: flex; flex-direction: column; justify-content: center; padding: 2rem 0;">
+    <div>
+      <h1 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem;">
+        你好，我是<br>
+        <span style="color: var(--accent);">Kraken</span>
+      </h1>
+      
+      <p style="font-size: 1.125rem; color: #666; max-width: 520px; line-height: 1.8; margin-bottom: 0.5rem;">
+        这里记录我的技术探索、生活瞬间和奇思妙想。
+      </p>
+      <p style="font-size: 1.125rem; color: #666; max-width: 520px; line-height: 1.8;">
+        正在学习、创造和分享的路上。
+      </p>
+    </div>
+
+    <div style="margin-top: 4rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
+      <a href="/posts" class="card">
+        <div class="card-icon">📝</div>
+        <h3 class="card-title">文章</h3>
+        <p class="card-desc">技术思考与学习笔记</p>
+      </a>
+
+      <a href="/projects" class="card">
+        <div class="card-icon">💻</div>
+        <h3 class="card-title">项目</h3>
+        <p class="card-desc">GitHub 开源作品展示</p>
+      </a>
+
+      <a href="/life" class="card">
+        <div class="card-icon">📷</div>
+        <h3 class="card-title">生活</h3>
+        <p class="card-desc">照片、视频与日常记录</p>
+      </a>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .card {
+    padding: 2rem;
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .card:hover {
+    transform: translateY(-8px);
+    border-color: var(--accent);
+    box-shadow: 0 20px 40px rgba(255, 107, 53, 0.15);
+  }
+  
+  .card-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .card-title {
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  .card-desc {
+    color: #666;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+</style>
