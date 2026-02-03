@@ -9,6 +9,39 @@ const repos = await response.json();
 
 // 过滤掉 fork 的仓库，只展示原创项目
 const myRepos = repos.filter(repo => !repo.fork);
+
+function getLangColor(lang: string): string {
+  const colors: Record<string, string> = {
+    'JavaScript': '#f1e05a',
+    'TypeScript': '#3178c6',
+    'Python': '#3572A5',
+    'Java': '#b07219',
+    'Go': '#00ADD8',
+    'Rust': '#dea584',
+    'HTML': '#e34c26',
+    'CSS': '#563d7c',
+    'Vue': '#41b883',
+    'React': '#61dafb',
+    'Astro': '#ff5d01',
+    'Shell': '#89e051',
+    'C++': '#f34b7d',
+    'C': '#555555',
+  };
+  return colors[lang] || '#8b949e';
+}
+
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  
+  if (days === 0) return '今天';
+  if (days === 1) return '昨天';
+  if (days < 7) return `${days} 天前`;
+  if (days < 30) return `${Math.floor(days / 7)} 周前`;
+  return date.toLocaleDateString('zh-CN');
+}
 ---
 
 <BaseLayout title="项目 | Kraken">
@@ -87,38 +120,5 @@ const myRepos = repos.filter(repo => !repo.fork);
     height: 8px;
     border-radius: 50%;
     display: inline-block;
-  }
-
-  function getLangColor(lang: string): string {
-    const colors: Record<string, string> = {
-      'JavaScript': '#f1e05a',
-      'TypeScript': '#3178c6',
-      'Python': '#3572A5',
-      'Java': '#b07219',
-      'Go': '#00ADD8',
-      'Rust': '#dea584',
-      'HTML': '#e34c26',
-      'CSS': '#563d7c',
-      'Vue': '#41b883',
-      'React': '#61dafb',
-      'Astro': '#ff5d01',
-      'Shell': '#89e051',
-      'C++': '#f34b7d',
-      'C': '#555555',
-    };
-    return colors[lang] || '#8b949e';
-  }
-
-  function formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    
-    if (days === 0) return '今天';
-    if (days === 1) return '昨天';
-    if (days < 7) return `${days} 天前`;
-    if (days < 30) return `${Math.floor(days / 7)} 周前`;
-    return date.toLocaleDateString('zh-CN');
   }
 </style>
