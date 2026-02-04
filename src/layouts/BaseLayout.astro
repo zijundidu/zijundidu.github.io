@@ -19,6 +19,14 @@ const currentPath = Astro.url.pathname;
       --border: #2a2a2a;
     }
     
+    [data-theme="light"] {
+      --bg: #ffffff;
+      --text: #1a1a1a;
+      --accent: #e85d04;
+      --secondary: #f5f5f5;
+      --border: #e0e0e0;
+    }
+    
     * { 
       margin: 0; 
       padding: 0; 
@@ -36,6 +44,7 @@ const currentPath = Astro.url.pathname;
       line-height: 1.6;
       display: flex;
       flex-direction: column;
+      transition: background 0.3s, color 0.3s;
     }
     
     nav {
@@ -46,6 +55,13 @@ const currentPath = Astro.url.pathname;
       max-width: 1200px;
       margin: 0 auto;
       width: 100%;
+      align-items: center;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      flex: 1;
     }
     
     nav a {
@@ -69,6 +85,21 @@ const currentPath = Astro.url.pathname;
       border-bottom-color: var(--accent);
     }
     
+    .theme-toggle {
+      background: var(--secondary);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+    
+    .theme-toggle:hover {
+      border-color: var(--accent);
+    }
+    
     main { 
       flex: 1;
       max-width: 1200px; 
@@ -80,20 +111,60 @@ const currentPath = Astro.url.pathname;
     footer {
       text-align: center; 
       padding: 2rem; 
-      color: #444; 
+      color: #888; 
       font-size: 0.875rem; 
       border-top: 1px solid var(--border);
     }
   </style>
+  
+  <script>
+    // 主题切换逻辑
+    const theme = (() => {
+      if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+        return localStorage.getItem('theme');
+      }
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+      }
+      return 'dark'; // 默认深色
+    })();
+    
+    if (theme === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+    
+    window.toggleTheme = () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    };
+  </script>
 </head>
 <body>
   <nav>
-    <a href="/" class={currentPath === '/' ? 'active' : ''}>首页</a>
-    <a href="/posts" class={currentPath.startsWith('/posts') ? 'active' : ''}>文章</a>
-    <a href="/projects" class={currentPath.startsWith('/projects') ? 'active' : ''}>项目</a>
-    <a href="/life" class={currentPath.startsWith('/life') ? 'active' : ''}>生活</a>
-    <a href="/about" class={currentPath.startsWith('/about') ? 'active' : ''}>关于</a>
+    <div class="nav-links">
+      <a href="/" class={currentPath === '/' ? 'active' : ''}>首页</a>
+      <a href="/posts" class={currentPath.startsWith('/posts') ? 'active' : ''}>文章</a>
+      <a href="/projects" class={currentPath.startsWith('/projects') ? 'active' : ''}>项目</a>
+      <a href="/life" class={currentPath.startsWith('/life') ? 'active' : ''}>生活</a>
+      <a href="/about" class={currentPath.startsWith('/about') ? 'active' : ''}>关于</a>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓 切换主题</button>
   </nav>
+
+  <div id="progress-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 3px; background: var(--border); z-index: 1000;">
+    <div id="progress-bar" style="height: 100%; background: var(--accent); width: 0%; transition: width 0.1s;"></div>
+  </div>
+
+  <script>
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('progress-bar').style.width = scrolled + "%";
+    });
+  </script>
   
   <main>
     <slot />

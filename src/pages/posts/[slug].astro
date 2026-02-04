@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import Giscus from '../../components/Giscus.astro';
+import ImageLightbox from '../../components/ImageLightbox.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -16,6 +17,7 @@ const { Content } = await post.render();
 ---
 
 <BaseLayout title={`${post.data.title} | Kraken`}>
+  <ImageLightbox />
   <article style="padding: 3rem 0; max-width: 800px;">
     <header style="margin-bottom: 3rem;">
       <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">

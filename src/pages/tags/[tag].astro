@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  const tags = [...new Set(posts.flatMap(post => post.data.tags))];
+  
+  return tags.map(tag => ({
+    params: { tag },
+    props: { 
+      tag,
+      posts: posts.filter(post => post.data.tags.includes(tag))
+        .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+    },
+  }));
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<BaseLayout title={`标签: ${tag} | Kraken`}>
+  <div style="padding: 3rem 0;">
+    <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">#{tag}</h1>
+    <p style="color: #666; margin-bottom: 3rem;">共 {posts.length} 篇文章</p>
+    
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      {posts.map(post => (
+        <article style="padding: 1.5rem 0; border-bottom: 1px solid var(--border);">
+          <a href={`/posts/${post.slug}`} style="font-size: 1.5rem; font-weight: 600; color: var(--text); text-decoration: none;">
+            {post.data.title}
+          </a>
+          <p style="color: #888; margin-top: 0.5rem;">{post.data.description}</p>
+          <time style="color: #666; font-size: 0.875rem;">{post.data.pubDate.toLocaleDateString('zh-CN')}</time>
+        </article>
+      ))}
+    </div>
+    
+    <div style="margin-top: 3rem;">
+      <a href="/tags" style="color: var(--accent); text-decoration: none;">← 查看所有标签</a>
+    </div>
+  </div>
+</BaseLayout>

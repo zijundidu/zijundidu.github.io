@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('posts');
+const tagCounts = posts.reduce((acc, post) => {
+  post.data.tags.forEach(tag => {
+    acc[tag] = (acc[tag] || 0) + 1;
+  });
+  return acc;
+}, {} as Record<string, number>);
+
+const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
+---
+
+<BaseLayout title="标签 | Kraken">
+  <div style="padding: 3rem 0;">
+    <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 3rem;">标签</h1>
+    
+    <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+      {sortedTags.map(([tag, count]) => (
+        <a href={`/tags/${tag}`} class="tag">
+          <span class="tag-name">{tag}</span>
+          <span class="tag-count">{count}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.2s;
+  }
+  
+  .tag:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  
+  .tag-name {
+    font-weight: 500;
+  }
+  
+  .tag-count {
+    padding: 0.125rem 0.5rem;
+    background: var(--bg);
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    color: #888;
+  }
+</style>
