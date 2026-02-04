@@ -1,10 +1,99 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const items = await getCollection('life', ({ data }) => {
+  return import.meta.env.PROD ? !data.draft : true;
+});
+
+items.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
 <BaseLayout title="生活 | Kraken">
-  <div style="min-height: calc(100vh - 200px); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+  <div style="padding: 3rem 0;">
     <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">生活</h1>
-    <p style="color: #666; font-size: 1.125rem;">即将上线...</p>
+    <p style="color: #666; margin-bottom: 3rem;">照片、视频与日常记录</p>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+      {items.map(item => (
+        <a href={`/life/${item.slug}`} class="life-card">
+          {item.data.cover ? (
+            <div class="cover" style={`background-image: url(${item.data.cover})`}></div>
+          ) : (
+            <div class="cover placeholder">
+              <span>📷</span>
+            </div>
+          )}
+          <div class="content">
+            <h3>{item.data.title}</h3>
+            {item.data.description && <p class="desc">{item.data.description}</p>}
+            <div class="meta">
+              <time>{item.data.pubDate.toLocaleDateString('zh-CN')}</time>
+              {item.data.location && <span> · {item.data.location}</span>}
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+    
+    {items.length === 0 && (
+      <p style="color: #666; text-align: center; padding: 4rem 0;">暂无记录</p>
+    )}
   </div>
 </BaseLayout>
+
+<style>
+  .life-card {
+    display: block;
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+  }
+  
+  .life-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(255, 107, 53, 0.1);
+  }
+  
+  .cover {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--secondary);
+  }
+  
+  .cover.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+  }
+  
+  .content {
+    padding: 1.5rem;
+  }
+  
+  .content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+  
+  .content .desc {
+    color: #888;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+  
+  .content .meta {
+    color: #666;
+    font-size: 0.8rem;
+  }
+</style>

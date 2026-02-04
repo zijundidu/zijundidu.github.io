@@ -12,6 +12,19 @@ const postsCollection = defineCollection({
   }),
 });
 
+const lifeCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    pubDate: z.date(),
+    location: z.string().optional(),
+    cover: z.string().optional(), // 封面图片路径
+    draft: z.boolean().default(false),
+  }),
+});
+
 export const collections = {
   posts: postsCollection,
+  life: lifeCollection,
 };
