@@ -19,7 +19,9 @@ const { Content } = await item.render();
   <article style="padding: 3rem 0; max-width: 900px;">
     <header style="margin-bottom: 2rem;">
       {item.data.cover && (
-        <div style="width: 100%; height: 400px; background-image: url({item.data.cover}); background-size: cover; background-position: center; border-radius: 12px; margin-bottom: 2rem;"></div>
+        <div 
+          style={`width: 100%; height: 400px; background-image: url(${item.data.cover}); background-size: cover; background-position: center; border-radius: 12px; margin-bottom: 2rem;`}>
+        </div>
       )}
       
       <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;">
