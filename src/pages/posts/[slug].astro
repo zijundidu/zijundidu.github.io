@@ -17,7 +17,6 @@ const { Content } = await post.render();
 ---
 
 <BaseLayout title={`${post.data.title} | Kraken`}>
-  <ImageLightbox />
   <article style="padding: 3rem 0; max-width: 800px;">
     <header style="margin-bottom: 3rem;">
       <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
@@ -50,6 +49,8 @@ const { Content } = await post.render();
     
     <Giscus />
   </article>
+
+  <ImageLightbox />
 </BaseLayout>
 
 <style>
