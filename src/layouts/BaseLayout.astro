@@ -1,7 +1,6 @@
 ---
 const { title = "Kraken" } = Astro.props;
 const currentPath = Astro.url.pathname;
-const base = '/my-portfolio';
 ---
 
 <!DOCTYPE html>
@@ -89,11 +88,11 @@ const base = '/my-portfolio';
 </head>
 <body>
   <nav>
-    <a href={`${base}/`} class={currentPath === `${base}/` || currentPath === `${base}` ? 'active' : ''}>首页</a>
-    <a href={`${base}/posts`} class={currentPath.startsWith(`${base}/posts`) ? 'active' : ''}>文章</a>
-    <a href={`${base}/projects`} class={currentPath.startsWith(`${base}/projects`) ? 'active' : ''}>项目</a>
-    <a href={`${base}/life`} class={currentPath.startsWith(`${base}/life`) ? 'active' : ''}>生活</a>
-    <a href={`${base}/about`} class={currentPath.startsWith(`${base}/about`) ? 'active' : ''}>关于</a>
+    <a href="/" class={currentPath === '/' ? 'active' : ''}>首页</a>
+    <a href="/posts" class={currentPath.startsWith('/posts') ? 'active' : ''}>文章</a>
+    <a href="/projects" class={currentPath.startsWith('/projects') ? 'active' : ''}>项目</a>
+    <a href="/life" class={currentPath.startsWith('/life') ? 'active' : ''}>生活</a>
+    <a href="/about" class={currentPath.startsWith('/about') ? 'active' : ''}>关于</a>
   </nav>
   
   <main>
@@ -101,7 +100,7 @@ const base = '/my-portfolio';
   </main>
   
   <footer>
-    <p>© 2026 Kraken. Built with Astro.</p>
+    <p>© 2025 Kraken. Built with Astro.</p>
   </footer>
 </body>
 </html>

@@ -1,7 +1,5 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-
-const base = '/my-portfolio';
 ---
 
 <BaseLayout>
@@ -21,19 +19,19 @@ const base = '/my-portfolio';
     </div>
 
     <div style="margin-top: 4rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
-      <a href={`${base}/posts`} class="card">
+      <a href="/posts" class="card">
         <div class="card-icon">📝</div>
         <h3 class="card-title">文章</h3>
         <p class="card-desc">技术思考与学习笔记</p>
       </a>
 
-      <a href={`${base}/projects`} class="card">
+      <a href="/projects" class="card">
         <div class="card-icon">💻</div>
         <h3 class="card-title">项目</h3>
         <p class="card-desc">GitHub 开源作品展示</p>
       </a>
 
-      <a href={`${base}/life`} class="card">
+      <a href="/life" class="card">
         <div class="card-icon">📷</div>
         <h3 class="card-title">生活</h3>
         <p class="card-desc">照片、视频与日常记录</p>
