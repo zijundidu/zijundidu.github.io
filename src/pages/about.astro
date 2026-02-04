@@ -3,8 +3,69 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="关于 | Kraken">
-  <div style="min-height: calc(100vh - 200px); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-    <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">关于</h1>
-    <p style="color: #666; font-size: 1.125rem;">即将上线...</p>
+  <div style="padding: 3rem 0; max-width: 800px;">
+    <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 3rem;">关于</h1>
+    
+    <section style="margin-bottom: 3rem;">
+      <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--accent); margin-bottom: 1rem;">我是谁</h2>
+      <p style="color: #ccc; line-height: 1.8; font-size: 1.125rem;">
+        我是 Kraken，一名热爱技术和生活的开发者。这里记录我的学习历程、项目实践和日常点滴。
+        相信持续学习和分享的力量，正在探索、创造和成长的路上。
+      </p>
+    </section>
+    
+    <section style="margin-bottom: 3rem;">
+      <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--accent); margin-bottom: 1rem;">这个站点</h2>
+      <p style="color: #ccc; line-height: 1.8;">
+        使用 <a href="https://astro.build" target="_blank" rel="noopener noreferrer" style="color: var(--accent);">Astro</a> 构建，
+        部署在 <a href="https://pages.github.com" target="_blank" rel="noopener noreferrer" style="color: var(--accent);">GitHub Pages</a>。
+        源代码托管在 <a href="https://github.com/zijundidu/zijundidu.github.io" target="_blank" rel="noopener noreferrer" style="color: var(--accent);">GitHub</a>。
+      </p>
+    </section>
+    
+    <section style="margin-bottom: 3rem;">
+      <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--accent); margin-bottom: 1rem;">联系我</h2>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <a href="https://github.com/zijundidu" target="_blank" rel="noopener noreferrer" class="contact-link">
+          <span>GitHub</span>
+        </a>
+        <!-- 添加更多联系方式 -->
+        <a href="mailto:your-email@example.com" class="contact-link">
+          <span>Email</span>
+        </a>
+      </div>
+    </section>
+    
+    <section>
+      <h2 style="font-size: 1.5rem; font-weight: 600; color: var(--accent); margin-bottom: 1rem;">时间线</h2>
+      <div style="border-left: 2px solid var(--border); padding-left: 1.5rem;">
+        <div style="margin-bottom: 1.5rem; position: relative;">
+          <div style="position: absolute; left: -1.75rem; top: 0.5rem; width: 8px; height: 8px; background: var(--accent); border-radius: 50%;"></div>
+          <time style="color: #666; font-size: 0.875rem;">2025</time>
+          <p style="color: #ccc; margin-top: 0.25rem;">搭建个人主页，开始记录和分享</p>
+        </div>
+        <!-- 添加更多时间节点 -->
+      </div>
+    </section>
   </div>
 </BaseLayout>
+
+<style>
+  .contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  
+  .contact-link:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+</style>
