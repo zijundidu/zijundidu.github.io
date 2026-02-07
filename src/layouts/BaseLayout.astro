@@ -9,6 +9,17 @@ const currentPath = Astro.url.pathname;
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title}</title>
+  
+  <!-- 主题切换必须在任何渲染之前执行，防止闪烁 -->
+  <script is:inline>
+    (function() {
+      const theme = localStorage.getItem('theme') || 'dark';
+      if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+  
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
   
   <style is:global>
@@ -28,7 +39,6 @@ const currentPath = Astro.url.pathname;
       --border: #e0e0e0;
     }
     
-    /* 全局 prose 浅色主题 */
     [data-theme="light"] .prose {
       color: #1a1a1a;
     }
@@ -80,8 +90,7 @@ const currentPath = Astro.url.pathname;
     [data-theme="light"] .prose a {
       color: var(--accent);
     }
-
-    /* RSS 链接浅色主题 */
+    
     [data-theme="light"] .rss-link {
       color: #666;
     }
@@ -226,20 +235,6 @@ const currentPath = Astro.url.pathname;
   </style>
   
   <script>
-    const theme = (() => {
-      if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
-        return localStorage.getItem('theme');
-      }
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        return 'dark';
-      }
-      return 'dark';
-    })();
-    
-    if (theme === 'light') {
-      document.documentElement.setAttribute('data-theme', 'light');
-    }
-    
     window.toggleTheme = () => {
       const current = document.documentElement.getAttribute('data-theme');
       const next = current === 'light' ? 'dark' : 'light';
