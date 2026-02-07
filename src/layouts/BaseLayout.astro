@@ -10,7 +10,8 @@ const currentPath = Astro.url.pathname;
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title}</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
-  <style>
+  
+  <style is:global>
     :root {
       --bg: #0f0f0f;
       --text: #f0f0f0;
@@ -27,44 +28,48 @@ const currentPath = Astro.url.pathname;
       --border: #e0e0e0;
     }
     
-    /* 文章正文 - 深色文字确保可读性 */
+    /* 全局 prose 浅色主题 */
     [data-theme="light"] .prose {
       color: #1a1a1a;
     }
     
-    [data-theme="light"] .prose :global(h1),
-    [data-theme="light"] .prose :global(h2),
-    [data-theme="light"] .prose :global(h3),
-    [data-theme="light"] .prose :global(h4) {
+    [data-theme="light"] .prose h1,
+    [data-theme="light"] .prose h2,
+    [data-theme="light"] .prose h3,
+    [data-theme="light"] .prose h4,
+    [data-theme="light"] .prose h5,
+    [data-theme="light"] .prose h6 {
       color: #000000;
     }
     
-    [data-theme="light"] .prose :global(p),
-    [data-theme="light"] .prose :global(li),
-    [data-theme="light"] .prose :global(ol) {
+    [data-theme="light"] .prose p,
+    [data-theme="light"] .prose li,
+    [data-theme="light"] .prose ol,
+    [data-theme="light"] .prose ul {
       color: #1a1a1a;
-      line-height: 1.8;
     }
     
-    /* 列表数字/符号加深 */
-    [data-theme="light"] .prose :global(strong),
-    [data-theme="light"] .prose :global(b) {
+    [data-theme="light"] .prose strong,
+    [data-theme="light"] .prose b {
       color: #000000;
     }
     
-    /* 代码块 */
-    [data-theme="light"] .prose :global(code) {
+    [data-theme="light"] .prose code {
       background: #e8e8e8;
       color: #1a1a1a;
     }
     
-    [data-theme="light"] .prose :global(pre) {
+    [data-theme="light"] .prose pre {
       background: #f5f5f5;
       border: 1px solid #e0e0e0;
     }
     
-    /* 引用 */
-    [data-theme="light"] .prose :global(blockquote) {
+    [data-theme="light"] .prose pre code {
+      background: none;
+      color: #1a1a1a;
+    }
+    
+    [data-theme="light"] .prose blockquote {
       color: #444;
       border-left-color: var(--accent);
       background: #fafafa;
@@ -72,12 +77,12 @@ const currentPath = Astro.url.pathname;
       border-radius: 0 4px 4px 0;
     }
     
-    /* 链接 */
-    [data-theme="light"] .prose :global(a) {
+    [data-theme="light"] .prose a {
       color: var(--accent);
-      text-decoration: underline;
     }
-    
+  </style>
+  
+  <style>
     * { 
       margin: 0; 
       padding: 0; 
@@ -96,6 +101,23 @@ const currentPath = Astro.url.pathname;
       display: flex;
       flex-direction: column;
       transition: background 0.3s, color 0.3s;
+    }
+    
+    #progress-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--border);
+      z-index: 1000;
+    }
+    
+    #progress-bar {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.1s;
     }
     
     nav {
@@ -136,6 +158,23 @@ const currentPath = Astro.url.pathname;
       border-bottom-color: var(--accent);
     }
     
+    .nav-right {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    
+    .rss-link {
+      color: #888;
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.2s;
+    }
+    
+    .rss-link:hover {
+      color: var(--accent);
+    }
+    
     .theme-toggle {
       background: var(--secondary);
       border: 1px solid var(--border);
@@ -166,10 +205,18 @@ const currentPath = Astro.url.pathname;
       font-size: 0.875rem; 
       border-top: 1px solid var(--border);
     }
+    
+    footer a {
+      color: #888;
+      text-decoration: none;
+    }
+    
+    footer a:hover {
+      color: var(--accent);
+    }
   </style>
   
   <script>
-    // 主题切换逻辑
     const theme = (() => {
       if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
         return localStorage.getItem('theme');
@@ -177,7 +224,7 @@ const currentPath = Astro.url.pathname;
       if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
         return 'dark';
       }
-      return 'dark'; // 默认深色
+      return 'dark';
     })();
     
     if (theme === 'light') {
@@ -190,10 +237,23 @@ const currentPath = Astro.url.pathname;
       document.documentElement.setAttribute('data-theme', next);
       localStorage.setItem('theme', next);
     };
+    
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      const progressBar = document.getElementById('progress-bar');
+      if (progressBar) {
+        progressBar.style.width = scrolled + "%";
+      }
+    });
   </script>
 </head>
-
 <body>
+  <div id="progress-container">
+    <div id="progress-bar"></div>
+  </div>
+  
   <nav>
     <div class="nav-links">
       <a href="/" class={currentPath === '/' ? 'active' : ''}>首页</a>
@@ -202,21 +262,11 @@ const currentPath = Astro.url.pathname;
       <a href="/life" class={currentPath.startsWith('/life') ? 'active' : ''}>生活</a>
       <a href="/about" class={currentPath.startsWith('/about') ? 'active' : ''}>关于</a>
     </div>
-    <button class="theme-toggle" onclick="toggleTheme()">🌓 切换主题</button>
+    <div class="nav-right">
+      <a href="/rss.xml" class="rss-link">RSS</a>
+      <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+    </div>
   </nav>
-
-  <div id="progress-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 3px; background: var(--border); z-index: 1000;">
-    <div id="progress-bar" style="height: 100%; background: var(--accent); width: 0%; transition: width 0.1s;"></div>
-  </div>
-
-  <script>
-    window.addEventListener('scroll', () => {
-      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      const scrolled = (winScroll / height) * 100;
-      document.getElementById('progress-bar').style.width = scrolled + "%";
-    });
-  </script>
   
   <main>
     <slot />
@@ -225,7 +275,7 @@ const currentPath = Astro.url.pathname;
   <footer>
     <p>© 2025 Kraken. Built with Astro.</p>
     <p style="margin-top: 0.5rem;">
-      <a href="/rss.xml" style="color: #666; text-decoration: none;">RSS 订阅</a>
+      <a href="/rss.xml">RSS 订阅</a>
     </p>
   </footer>
 </body>
