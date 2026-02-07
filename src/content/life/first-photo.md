@@ -7,6 +7,7 @@ cover: /images/test.jpg
 ---
 
 这是我的第一张测试照片。
+![测试图片](/images/test.jpg)
 
 生活记录可以包含：
 - 照片
