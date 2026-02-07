@@ -27,33 +27,55 @@ const currentPath = Astro.url.pathname;
       --border: #e0e0e0;
     }
     
-    /* 添加 prose 的浅色适配 */
+    /* 文章正文 - 深色文字确保可读性 */
     [data-theme="light"] .prose {
-      color: #333;
-    }
-    
-    [data-theme="light"] .prose :global(h2),
-    [data-theme="light"] .prose :global(h3) {
       color: #1a1a1a;
     }
     
-    [data-theme="light"] .prose :global(p),
-    [data-theme="light"] .prose :global(li) {
-      color: #444;
+    [data-theme="light"] .prose :global(h1),
+    [data-theme="light"] .prose :global(h2),
+    [data-theme="light"] .prose :global(h3),
+    [data-theme="light"] .prose :global(h4) {
+      color: #000000;
     }
     
+    [data-theme="light"] .prose :global(p),
+    [data-theme="light"] .prose :global(li),
+    [data-theme="light"] .prose :global(ol) {
+      color: #1a1a1a;
+      line-height: 1.8;
+    }
+    
+    /* 列表数字/符号加深 */
+    [data-theme="light"] .prose :global(strong),
+    [data-theme="light"] .prose :global(b) {
+      color: #000000;
+    }
+    
+    /* 代码块 */
     [data-theme="light"] .prose :global(code) {
       background: #e8e8e8;
-      color: #333;
+      color: #1a1a1a;
     }
     
     [data-theme="light"] .prose :global(pre) {
-      background: #f0f0f0;
+      background: #f5f5f5;
+      border: 1px solid #e0e0e0;
     }
     
+    /* 引用 */
     [data-theme="light"] .prose :global(blockquote) {
-      color: #666;
+      color: #444;
       border-left-color: var(--accent);
+      background: #fafafa;
+      padding: 0.5rem 1rem;
+      border-radius: 0 4px 4px 0;
+    }
+    
+    /* 链接 */
+    [data-theme="light"] .prose :global(a) {
+      color: var(--accent);
+      text-decoration: underline;
     }
     
     * { 
