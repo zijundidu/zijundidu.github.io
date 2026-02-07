@@ -1,24 +1,44 @@
-<div id="lightbox" class="lightbox" onclick="closeLightbox()">
-  <span class="close">&times;</span>
-  <img id="lightbox-img" class="lightbox-content">
+<div id="lightbox" class="lightbox">
+  <span class="close" onclick="event.stopPropagation(); closeLightbox();">&times;</span>
+  <img id="lightbox-img" class="lightbox-content" onclick="event.stopPropagation();">
 </div>
 
 <script>
-  // 为所有文章图片添加点击事件
-  document.querySelectorAll('.prose img').forEach(img => {
-    img.style.cursor = 'zoom-in';
-    img.onclick = (e) => {
-      e.stopPropagation();
-      const lightbox = document.getElementById('lightbox');
-      const lightboxImg = document.getElementById('lightbox-img');
-      lightboxImg.src = img.src;
-      lightbox.style.display = 'flex';
-    };
-  });
+  function openLightbox(src) {
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    lightboxImg.src = src;
+    lightbox.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // 禁止背景滚动
+  }
   
   function closeLightbox() {
-    document.getElementById('lightbox').style.display = 'none';
+    const lightbox = document.getElementById('lightbox');
+    lightbox.style.display = 'none';
+    document.body.style.overflow = ''; // 恢复滚动
   }
+  
+  // 等待 DOM 加载完成
+  document.addEventListener('DOMContentLoaded', () => {
+    // 查找所有文章内的图片
+    const images = document.querySelectorAll('article img, .prose img');
+    
+    images.forEach(img => {
+      img.style.cursor = 'zoom-in';
+      img.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openLightbox(img.src);
+      });
+    });
+    
+    // 点击背景关闭
+    const lightbox = document.getElementById('lightbox');
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        closeLightbox();
+      }
+    });
+  });
   
   // ESC 键关闭
   document.addEventListener('keydown', (e) => {
@@ -45,6 +65,7 @@
     max-width: 90%;
     max-height: 90%;
     object-fit: contain;
+    cursor: default;
   }
   
   .close {
@@ -55,9 +76,10 @@
     font-size: 40px;
     font-weight: bold;
     cursor: pointer;
+    z-index: 10000;
   }
   
   .close:hover {
-    color: #bbb;
+    color: var(--accent);
   }
 </style>
