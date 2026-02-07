@@ -80,6 +80,15 @@ const currentPath = Astro.url.pathname;
     [data-theme="light"] .prose a {
       color: var(--accent);
     }
+
+    /* RSS 链接浅色主题 */
+    [data-theme="light"] .rss-link {
+      color: #666;
+    }
+    
+    [data-theme="light"] .rss-link:hover {
+      color: var(--accent);
+    }
   </style>
   
   <style>
@@ -273,7 +282,7 @@ const currentPath = Astro.url.pathname;
   </main>
   
   <footer>
-    <p>© 2025 Kraken. Built with Astro.</p>
+    <p>© 2026 Kraken. Built with Astro.</p>
     <p style="margin-top: 0.5rem;">
       <a href="/rss.xml">RSS 订阅</a>
     </p>

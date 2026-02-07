@@ -1,19 +1,52 @@
 <div class="giscus"></div>
 
-<script src="https://giscus.app/client.js"
-        data-repo="zijundidu/zijundidu.github.io"
-        data-repo-id="R_kgDORHtVlA"
-        data-category="General"
-        data-category-id="DIC_kwDORHtVlM4C137K"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="bottom"
-        data-theme="dark"
-        data-lang="zh-CN"
-        crossorigin="anonymous"
-        async>
+<script>
+  function getTheme() {
+    const theme = document.documentElement.getAttribute('data-theme');
+    return theme === 'light' ? 'light' : 'dark';
+  }
+  
+  function loadGiscus() {
+    const script = document.createElement('script');
+    script.src = 'https://giscus.app/client.js';
+    script.setAttribute('data-repo', 'zijundidu/zijundidu.github.io');
+    script.setAttribute('data-repo-id', 'R_kgDORHtVlA');
+    script.setAttribute('data-category', 'General');
+    script.setAttribute('data-category-id', 'DIC_kwDORHtVlM4C137K');
+    script.setAttribute('data-mapping', 'pathname');
+    script.setAttribute('data-strict', '0');
+    script.setAttribute('data-reactions-enabled', '1');
+    script.setAttribute('data-emit-metadata', '0');
+    script.setAttribute('data-input-position', 'bottom');
+    script.setAttribute('data-theme', getTheme());
+    script.setAttribute('data-lang', 'zh-CN');
+    script.setAttribute('crossorigin', 'anonymous');
+    script.async = true;
+    return script;
+  }
+  
+  // 初始加载
+  const giscusContainer = document.querySelector('.giscus');
+  if (giscusContainer) {
+    giscusContainer.innerHTML = '';
+    giscusContainer.appendChild(loadGiscus());
+  }
+  
+  // 监听主题切换
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
+        // 重新加载 Giscus 以应用新主题
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (iframe) {
+          const newTheme = getTheme();
+          iframe.contentWindow.postMessage({ giscus: { setConfig: { theme: newTheme } } }, 'https://giscus.app');
+        }
+      }
+    });
+  });
+  
+  observer.observe(document.documentElement, { attributes: true });
 </script>
 
 <style>
