@@ -27,6 +27,35 @@ const currentPath = Astro.url.pathname;
       --border: #e0e0e0;
     }
     
+    /* 添加 prose 的浅色适配 */
+    [data-theme="light"] .prose {
+      color: #333;
+    }
+    
+    [data-theme="light"] .prose :global(h2),
+    [data-theme="light"] .prose :global(h3) {
+      color: #1a1a1a;
+    }
+    
+    [data-theme="light"] .prose :global(p),
+    [data-theme="light"] .prose :global(li) {
+      color: #444;
+    }
+    
+    [data-theme="light"] .prose :global(code) {
+      background: #e8e8e8;
+      color: #333;
+    }
+    
+    [data-theme="light"] .prose :global(pre) {
+      background: #f0f0f0;
+    }
+    
+    [data-theme="light"] .prose :global(blockquote) {
+      color: #666;
+      border-left-color: var(--accent);
+    }
+    
     * { 
       margin: 0; 
       padding: 0; 
