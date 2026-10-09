@@ -1,8 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { publishedOnly } from '../lib/content';
 
-const posts = await getCollection('posts');
+const posts = publishedOnly(await getCollection('posts'));
 const tagCounts = posts.reduce((acc, post) => {
   post.data.tags.forEach(tag => {
     acc[tag] = (acc[tag] || 0) + 1;
@@ -13,10 +14,10 @@ const tagCounts = posts.reduce((acc, post) => {
 const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
 ---
 
-<BaseLayout title="标签 | Kraken">
+<BaseLayout title="标签 | Kraken" description="Kraken 博客的全部标签。">
   <div style="padding: 3rem 0;">
     <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 3rem;">标签</h1>
-    
+
     <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
       {sortedTags.map(([tag, count]) => (
         <a href={`/tags/${tag}`} class="tag">
@@ -41,21 +42,21 @@ const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
     color: var(--text);
     transition: all 0.2s;
   }
-  
+
   .tag:hover {
     border-color: var(--accent);
     color: var(--accent);
   }
-  
+
   .tag-name {
     font-weight: 500;
   }
-  
+
   .tag-count {
     padding: 0.125rem 0.5rem;
     background: var(--bg);
     border-radius: 9999px;
     font-size: 0.75rem;
-    color: #888;
+    color: var(--text-muted);
   }
 </style>

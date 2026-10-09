@@ -1,19 +1,18 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { publishedOnly } from '../lib/content';
 
-const items = await getCollection('life', ({ data }) => {
-  return import.meta.env.PROD ? !data.draft : true;
-});
+const items = publishedOnly(await getCollection('life'));
 
 items.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
-<BaseLayout title="生活 | Kraken">
+<BaseLayout title="生活 | Kraken" description="Kraken 的生活记录：照片、视频与日常记录。">
   <div style="padding: 3rem 0;">
     <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">生活</h1>
-    <p style="color: #666; margin-bottom: 3rem;">照片、视频与日常记录</p>
-    
+    <p style="color: var(--text-faint); margin-bottom: 3rem;">照片、视频与日常记录</p>
+
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
       {items.map(item => (
         <a href={`/life/${item.slug}`} class="life-card">
@@ -35,9 +34,9 @@ items.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
         </a>
       ))}
     </div>
-    
+
     {items.length === 0 && (
-      <p style="color: #666; text-align: center; padding: 4rem 0;">暂无记录</p>
+      <p style="color: var(--text-faint); text-align: center; padding: 4rem 0;">暂无记录</p>
     )}
   </div>
 </BaseLayout>
@@ -53,47 +52,47 @@ items.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
     color: inherit;
     transition: all 0.3s ease;
   }
-  
+
   .life-card:hover {
     border-color: var(--accent);
     transform: translateY(-4px);
     box-shadow: 0 10px 30px rgba(255, 107, 53, 0.1);
   }
-  
+
   .cover {
     height: 200px;
     background-size: cover;
     background-position: center;
     background-color: var(--secondary);
   }
-  
+
   .cover.placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 3rem;
   }
-  
+
   .content {
     padding: 1.5rem;
   }
-  
+
   .content h3 {
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: var(--text);
   }
-  
+
   .content .desc {
-    color: #888;
+    color: var(--text-muted);
     font-size: 0.9rem;
     line-height: 1.5;
     margin-bottom: 1rem;
   }
-  
+
   .content .meta {
-    color: #666;
+    color: var(--text-faint);
     font-size: 0.8rem;
   }
 </style>

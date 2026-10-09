@@ -13,6 +13,8 @@ zijundidu.github.io/
 │   │   ├── life/            # 生活记录
 │   │   └── posts/           # 文章
 │   ├── layouts/              # 页面布局
+│   ├── lib/                  # 公共工具函数
+│   ├── styles/               # 全局样式与主题变量
 │   └── pages/                # 页面路由
 └── .github/workflows/        # 自动部署
 ```

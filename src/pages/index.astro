@@ -1,9 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import { publishedOnly } from '../lib/content';
 
-// 获取标签数据
-const posts = await getCollection('posts');
+// 获取标签数据（生产环境排除草稿，避免草稿标签泄漏到首页）
+const posts = publishedOnly(await getCollection('posts'));
 const tagCounts = posts.reduce((acc, post) => {
   post.data.tags.forEach(tag => {
     acc[tag] = (acc[tag] || 0) + 1;
@@ -23,11 +24,11 @@ const topTags = Object.entries(tagCounts)
         你好，我是<br>
         <span style="color: var(--accent);">Kraken</span>
       </h1>
-      
-      <p style="font-size: 1.125rem; color: #666; max-width: 520px; line-height: 1.6; margin-bottom: 0.25rem;">
+
+      <p style="font-size: 1.125rem; color: var(--text-faint); max-width: 520px; line-height: 1.6; margin-bottom: 0.25rem;">
         这里记录我的技术探索、生活瞬间和奇思妙想。
       </p>
-      <p style="font-size: 1.125rem; color: #666; max-width: 520px; line-height: 1.6;">
+      <p style="font-size: 1.125rem; color: var(--text-faint); max-width: 520px; line-height: 1.6;">
         正在学习、创造和分享的路上。
       </p>
     </div>
@@ -52,14 +53,14 @@ const topTags = Object.entries(tagCounts)
       </a>
     </div>
 
-    <!-- 添加标签云 -->
+    <!-- 标签云 -->
     {topTags.length > 0 && (
       <div style="margin-top: 3rem;">
-        <h3 style="font-size: 1rem; color: #666; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">热门标签</h3>
+        <h3 style="font-size: 1rem; color: var(--text-faint); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">热门标签</h3>
         <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
           {topTags.map(([tag, count]) => (
             <a href={`/tags/${tag}`} class="tag">
-              {tag} <span style="color: #666; margin-left: 0.25rem;">{count}</span>
+              {tag} <span style="color: var(--text-faint); margin-left: 0.25rem;">{count}</span>
             </a>
           ))}
           <a href="/tags" style="color: var(--accent); font-size: 0.875rem; display: flex; align-items: center;">查看全部 →</a>
@@ -79,27 +80,27 @@ const topTags = Object.entries(tagCounts)
     color: inherit;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
+
   .card:hover {
     transform: translateY(-8px);
     border-color: var(--accent);
     box-shadow: 0 20px 40px rgba(255, 107, 53, 0.15);
   }
-  
+
   .card-icon {
     font-size: 2rem;
     margin-bottom: 1rem;
   }
-  
+
   .card-title {
     color: var(--accent);
     margin-bottom: 0.5rem;
     font-size: 1.25rem;
     font-weight: 600;
   }
-  
+
   .card-desc {
-    color: #666;
+    color: var(--text-faint);
     font-size: 0.95rem;
     line-height: 1.6;
   }
@@ -114,7 +115,7 @@ const topTags = Object.entries(tagCounts)
     font-size: 0.875rem;
     transition: all 0.2s;
   }
-  
+
   .tag:hover {
     border-color: var(--accent);
     color: var(--accent);
