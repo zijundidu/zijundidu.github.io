@@ -107,18 +107,20 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 				{
 					name: "GitHub",
 					icon: "fa7-brands:github",
-					url: "https://github.com/CuteLeaf/Firefly",
+					url: "https://github.com/zijundidu",
 					showName: true,
 				},
 				{
 					name: "Email",
 					icon: "fa7-solid:envelope",
-					url: "mailto:xiaye@msn.com",
+					url: "mailto:zijundidu@163.com",
 				},
 				{
+					// 暂无个人收款图，先跳到"关于"页；后续把微信收款图放到
+					// public/assets/images/sponsor/wechat.png 后，可改为 /sponsor/ 并开启 siteConfig 的 sponsor 页面开关
 					name: "Sponsor",
 					icon: "material-symbols:favorite",
-					url: "https://blog.cuteleaf.cn/sponsor/",
+					url: "/about/",
 				},
 				{
 					name: "RSS",

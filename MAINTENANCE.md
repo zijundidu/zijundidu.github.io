@@ -162,7 +162,8 @@ comment: true              # false 关闭本文评论
 | `galleryConfig.ts` | 相册 |
 | `musicConfig.ts` | 背景音乐 |
 | `backgroundWallpaper.ts` | 主页背景图/视频 |
-| `friends.mdx`（在 content/spec/） | 友链页：改 `site` 对象（自己站点信息）+ 下方友链列表数组 |
+| `friendsConfig.ts` | 友链列表（增删改条目） |
+| `content/spec/friends.mdx` | 友链页面底部的自定义文字 |
 
 ### 5.4 页面开关
 `siteConfig.ts` 里 `pages` 段：每个页面（友链/留言板/动态/项目/相册/书签/打赏等）`true/false`。设为 `false` 会自动 404 并隐藏导航项。
@@ -195,3 +196,31 @@ comment: true              # false 关闭本文评论
 | 发布后归档/时间线/最后活动没立刻更新 | 同上：GitHub Pages 对 HTML 设了约 10 分钟的缓存（max-age=600），部署后稍等或 Ctrl+F5 强刷，属正常现象 |
 | 想换回纯色无背景 | `backgroundWallpaper.ts` 的 `mode: "none"` |
 | 访问统计数字不显示 | 多刷新几次；数字异步填充有 1-2 秒延迟；广告拦截插件可能拦截 vercount.one |
+
+### 5.9 站点资源地图（图片/内容放哪）
+
+**内容资源**
+
+| 位置 | 作用 |
+|:---|:---|
+| `src/content/posts/` | 文章，一个 `.md` 一个 URL（URL = 文件名） |
+| `src/content/dynamic/` | 动态/生活碎片，进时间线和首页侧栏 |
+| `src/content/projects/` | 项目页精选卡片（GitHub 仓库区块自动拉取，不用管） |
+| `src/content/spec/` | `friends.mdx` 友链页底部文字、`about.md` 关于页、`guestbook.md` 留言板 |
+
+**图片/媒体资源**
+
+| 位置 | 作用 | 谁在引用 |
+|:---|:---|:---|
+| `src/assets/images/DesktopWallpaper/` `MobileWallpaper/` | 首页 banner 壁纸（d1-d6 / m1-m6，每次刷新随机一张） | `backgroundWallpaper.ts` |
+| `public/assets/images/` | 自定义 banner 背景图（换图放这里，见第 1 章） | `backgroundWallpaper.ts` |
+| `public/images/` | 文章正文插图，正文写 `![说明](/images/xxx.jpg)` | 各文章 |
+| `public/gallery/` | 相册照片，一个子目录一个相册（见第 4 章） | `galleryConfig.ts` |
+| `public/assets/music/` | 背景音乐 mp3 + 封面（见第 2 章） | `musicConfig.ts` |
+| `public/assets/images/sponsor/` | 打赏收款码（当前为空）：放入 `wechat.png`/`alipay.png` 后，把 `sponsorConfig.ts` 对应条目 `enabled: true` 并打开 `siteConfig.ts` 的 `sponsor` 页面开关 | `sponsorConfig.ts` |
+| `public/favicon.svg` `public/favicon/` | 站点图标 | 浏览器标签页 |
+| 头像 | 无本地文件，用 GitHub 远程头像 `https://github.com/zijundidu.png` | `profileConfig.ts` |
+
+**首页横幅标题下方的链接图标**（GitHub / Email / Sponsor / RSS）：`src/config/backgroundWallpaper.ts` 的 `homeText.links`。当前 Sponsor 跳转到 `/about/`，放了收款码后可改为 `/sponsor/`。
+
+**已清理的死资源（2026-10-09，git 历史可找回）**：看板娘模型 `public/pio/`（15MB，看板娘开关已关）、主题作者的收款码/广告图/示例字体、无引用的示例图（`test.jpg`、`posts/images/`、`projects/images/`）、无引用的 js/css（marked/highlight/twikoo）、`anime-list.json`。若以后要开看板娘或打赏页，需重新准备对应文件。
