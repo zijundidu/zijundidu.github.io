@@ -585,6 +585,26 @@ const ogImageAlt = propsOgImageAlt ?? pageTitle;
 
     <!-- GitHub 卡片客户端实时补全（forks/stars） -->
     <GithubCardManager />
+
+    <!-- 图标 symbol 置顶：astro-icon 把 <symbol> 放在图标首次出现的位置，
+         首次出现可能在会被 Swup 替换的容器内，而导航栏等 <use> 引用在容器外。
+         统一移到 body 下，保证无刷新切换后引用始终可解析 -->
+    <script is:inline>
+      (function () {
+        function hoistIconSymbols() {
+          document.querySelectorAll('symbol[id^="ai:"]').forEach(function (sym) {
+            if (sym.parentElement !== document.body) {
+              document.body.appendChild(sym);
+            }
+          });
+        }
+        hoistIconSymbols();
+        document.addEventListener("DOMContentLoaded", hoistIconSymbols);
+        document.addEventListener("swup:contentReplaced", function () {
+          setTimeout(hoistIconSymbols, 0);
+        });
+      })();
+    </script>
   </body>
 </html>
 

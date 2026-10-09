@@ -72,7 +72,7 @@ const getActivityDate = (post: (typeof posts)[number]): Date => {
 const lastActivityDate = posts.reduce<Date | null>((latest, post) => {
 	const current = getActivityDate(post);
 	if (!latest || current > latest) return current;
-	return current;
+	return latest;
 }, null);
 
 const lastPostDate = lastActivityDate ? lastActivityDate.toISOString() : null;
