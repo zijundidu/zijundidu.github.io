@@ -177,7 +177,7 @@ comment: true              # false 关闭本文评论
 - 注意：站内无刷新切换页面不计数（轻微低估），想要历史趋势图需另接 51.la / Cloudflare Analytics
 
 ### 5.7 站点外观微调
-- 主题色：`siteConfig.ts` 的 `themeColor.hue`（0-360，当前 165 青绿）
+- 主题色：`siteConfig.ts` 的 `themeColor.hue`（0-360，当前 222 青蓝；主色锚点已按定制色卡写死在 `src/styles/variables.styl`，改 hue 只影响背景/标签等派生色）
 - 深浅色默认：`themeColor.defaultMode`（"light"/"dark"/"system"）
 - 卡片立体边框：`card.border`；页面宽度：`pageWidth`
 - 文章列表样式：`postListLayout`（list/grid、封面位置、简介行数）
