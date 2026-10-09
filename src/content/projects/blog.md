@@ -1,6 +1,6 @@
 ---
 title: 个人博客
-published: 2025-02-02
+published: 2026-10-09
 description: 基于 Astro + Firefly 主题的个人博客，部署在 GitHub Pages
 tags: ["Astro", "博客", "开源"]
 status: "维护中"
