@@ -1,11 +1,6 @@
 ---
-// 不蒜子（Busuanzi）访问量统计
-// 纯前端第三方统计，无需自建服务器，计数数据由 busuanzi.ibr2.com 提供
+// 站点访问统计：使用 Vercount（不蒜子的现代替代，API 兼容原 busuanzi 的 span ID 约定）
+// 纯前端第三方计数，无需自建服务器；不蒜子官方域名（busuanzi.ibr2.com）已被 DNS 污染，国内无法访问
 ---
 
-<script
-	is:inline
-	data-swup-ignore-script
-	async
-	src="https://busuanzi.ibr2.com/busuanzi/2.3/busuanzi.pure.mini.js"
-></script>
+<script is:inline data-swup-ignore-script async src="https://vercount.one/js"></script>

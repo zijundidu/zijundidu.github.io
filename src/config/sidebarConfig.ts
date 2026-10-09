@@ -124,6 +124,8 @@ export const sidebarLayoutConfig: SidebarLayoutConfig = {
 			position: "top",
 			// 是否在文章详情页显示
 			showOnPostPage: false,
+			// 仅桌面端统计组件渲染访问量/访客数（span ID 需全页唯一）
+			customProps: { showBusuanzi: true },
 		},
 		{
 			// 组件类型：日历组件
