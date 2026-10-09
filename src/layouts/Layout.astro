@@ -189,7 +189,10 @@ const ogImageAlt = propsOgImageAlt ?? pageTitle;
             />
     )}
 
-    <!-- 不蒜子访问量统计：第三方纯前端计数，无需自建服务，全站生效 -->
+    <!-- 预连接统计服务，缩短计数脚本的连接建立耗时 -->
+    <link rel="preconnect" href="https://vercount.one" crossorigin />
+
+    <!-- Vercount 访问量统计：第三方纯前端计数，无需自建服务，全站生效 -->
     <BusuanziAnalytics />
 
     <title>{pageTitle}</title>

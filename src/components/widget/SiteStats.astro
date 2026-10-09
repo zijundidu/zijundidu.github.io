@@ -22,10 +22,12 @@ const { class: className, style, widgetConfig } = Astro.props;
 
 const showTitle = widgetConfig?.showTitle !== false;
 
-// 访问量/访客数的 span ID 必须全页唯一（第三方 JS 按 ID 填充），
-// 通过 customProps.showBusuanzi 只允许一个实例渲染这三行（当前为桌面端右侧栏）
-const { showBusuanzi } = (widgetConfig?.customProps ?? {}) as {
+// 访问量/访客数的统计锚点（带 ID 的 span）必须全页唯一（第三方 JS 按 ID 填充）。
+// 桌面端实例渲染统计锚点（customProps.showBusuanzi），
+// 移动端实例渲染复制展示位（customProps.showBusuanziCopy），由脚本同步数值
+const { showBusuanzi, showBusuanziCopy } = (widgetConfig?.customProps ?? {}) as {
 	showBusuanzi?: boolean;
+	showBusuanziCopy?: boolean;
 };
 
 // 从配置中获取站点开始日期
@@ -188,6 +190,34 @@ const statSuffixClass = "ml-1 text-sm text-neutral-500 dark:text-neutral-400";
     </div>
       </>
     )}
+    {showBusuanziCopy && (
+      <>
+    <div class={statRowClass}>
+      <div class={statLabelClass}>
+        <div class="text-(--primary) text-xl">
+          <Icon name="material-symbols:visibility-outline" />
+        </div>
+        <span>累计访问</span>
+      </div>
+      <div class="flex items-center">
+        <span class={statValueClass}><span class="js-site-pv">…</span></span>
+        <span class={statSuffixClass}>次</span>
+      </div>
+    </div>
+    <div class={statRowClass}>
+      <div class={statLabelClass}>
+        <div class="text-(--primary) text-xl">
+          <Icon name="material-symbols:group-outline" />
+        </div>
+        <span>访客数</span>
+      </div>
+      <div class="flex items-center">
+        <span class={statValueClass}><span class="js-site-uv">…</span></span>
+        <span class={statSuffixClass}>人</span>
+      </div>
+    </div>
+      </>
+    )}
     <div class={statRowClass}>
       <div class={statLabelClass}>
         <div class="text-(--primary) text-xl">
@@ -240,15 +270,58 @@ const statSuffixClass = "ml-1 text-sm text-neutral-500 dark:text-neutral-400";
     }
   }
 
+  // 访问量统计同步：监听 Vercount 填充的锚点，把数值复制到全部展示位（含移动端），
+  // 并用最近一次结果在无刷新跳转后回填，避免数字变回占位符
+  function copyStatValues() {
+    const pv = document.getElementById("busuanzi_value_site_pv")?.textContent?.trim();
+    const uv = document.getElementById("busuanzi_value_site_uv")?.textContent?.trim();
+    if (pv && pv !== "…") {
+      window.__siteStatPv = pv;
+      document.querySelectorAll(".js-site-pv").forEach((el) => { el.textContent = pv; });
+    }
+    if (uv && uv !== "…") {
+      window.__siteStatUv = uv;
+      document.querySelectorAll(".js-site-uv").forEach((el) => { el.textContent = uv; });
+    }
+  }
+
+  function restoreStatValues() {
+    if (window.__siteStatPv) {
+      const pvEl = document.getElementById("busuanzi_value_site_pv");
+      if (pvEl && (!pvEl.textContent || pvEl.textContent.trim() === "…")) pvEl.textContent = window.__siteStatPv;
+      document.querySelectorAll(".js-site-pv").forEach((el) => { el.textContent = window.__siteStatPv; });
+    }
+    if (window.__siteStatUv) {
+      const uvEl = document.getElementById("busuanzi_value_site_uv");
+      if (uvEl && (!uvEl.textContent || uvEl.textContent.trim() === "…")) uvEl.textContent = window.__siteStatUv;
+      document.querySelectorAll(".js-site-uv").forEach((el) => { el.textContent = window.__siteStatUv; });
+    }
+  }
+
+  function bindStatObservers() {
+    for (const id of ["busuanzi_value_site_pv", "busuanzi_value_site_uv"]) {
+      const el = document.getElementById(id);
+      if (el) {
+        new MutationObserver(copyStatValues).observe(el, { childList: true, characterData: true, subtree: true });
+      }
+    }
+  }
+
   // 页面加载时更新
   updateDynamicStats();
+  copyStatValues();
+  bindStatObservers();
 
   // 防止 Swup 切页重跑脚本时重复注册监听器
   if (!window.__siteStatsInit) {
     window.__siteStatsInit = true;
-    // 页面切换时重新更新
+    // 页面切换时重新更新运行天数，并回填缓存的访问数据
     document.addEventListener("swup:contentReplaced", () => {
-      setTimeout(updateDynamicStats, 100);
+      setTimeout(() => {
+        updateDynamicStats();
+        restoreStatValues();
+        bindStatObservers();
+      }, 100);
     });
   }
 </script>

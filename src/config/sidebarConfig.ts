@@ -283,6 +283,8 @@ export const sidebarLayoutConfig: SidebarLayoutConfig = {
 			enable: true,
 			// 是否在文章详情页显示
 			showOnPostPage: true,
+			// 移动端统计组件：通过 js-site-pv/uv 展示位接收桌面端锚点的数值副本
+			customProps: { showBusuanziCopy: true },
 		},
 	],
 };
