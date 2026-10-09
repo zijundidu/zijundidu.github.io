@@ -1,0 +1,72 @@
+---
+import { Icon } from "astro-icon/components";
+import { getCollection } from "astro:content";
+import I18nKey from "@/i18n/i18nKey";
+import { i18n } from "@/i18n/translation";
+import { getPostUrlBySlug } from "@/utils/url-utils";
+
+// 站点时间线：合并文章与动态，按时间倒序展示
+// 数据在构建时静态生成，发布新内容后重新部署即自动更新
+
+const posts = (await getCollection("posts")).filter((post) =>
+	import.meta.env.PROD ? !post.data.draft : true,
+);
+const dynamics = await getCollection("dynamic");
+
+const items = [
+	...posts.map((post) => ({
+		date: post.data.published,
+		icon: "material-symbols:article-outline",
+		text: `发布了文章《${post.data.title}》`,
+		url: getPostUrlBySlug(post.id),
+	})),
+	...dynamics.map((dynamic) => {
+		const firstLine =
+			(dynamic.body ?? "")
+				.split("\n")
+				.map((line) => line.trim())
+				.find((line) => line.length > 0) ?? "";
+		const summary = firstLine
+			.replace(/[!#*`>\[\]()\\|]/g, "")
+			.slice(0, 30);
+		return {
+			date: dynamic.data.published,
+			icon: "material-symbols:forum-rounded",
+			text: summary ? `发布了一条动态：${summary}${firstLine.length > 30 ? "…" : ""}` : "发布了一条动态",
+			url: "/dynamic/",
+		};
+	}),
+]
+	.sort((a, b) => b.date.getTime() - a.date.getTime())
+	.slice(0, 30);
+
+const formatDate = (date: Date) =>
+	`${date.getFullYear()} 年 ${date.getMonth() + 1} 月 ${date.getDate()} 日`;
+---
+
+<div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32 mt-4">
+	<div class="card-base z-10 px-9 py-6 relative w-full">
+		<h2 class="text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-5 flex items-center gap-2">
+			<Icon name="material-symbols:timeline" class="text-(--primary)" />
+			{i18n(I18nKey.about) === "关于" ? "站点时间线" : "Timeline"}
+		</h2>
+		<ol class="relative border-l-2 border-(--primary) ml-3">
+			{items.map((item) => (
+				<li class="mb-5 ml-5">
+					<span class="absolute -left-[0.7rem] flex items-center justify-center w-6 h-6 rounded-full bg-(--primary) text-white">
+						<Icon name={item.icon} class="text-sm" />
+					</span>
+					<time class="block text-sm text-neutral-500 dark:text-neutral-400 mb-0.5">
+						{formatDate(item.date)}
+					</time>
+					<a
+						href={item.url}
+						class="text-neutral-800 dark:text-neutral-200 hover:text-(--primary) transition-colors"
+					>
+						{item.text}
+					</a>
+				</li>
+			))}
+		</ol>
+	</div>
+</div>

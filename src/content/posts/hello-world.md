@@ -1,8 +1,9 @@
 ---
 title: 你好，世界
 description: 这是我的第一篇博客文章
-pubDate: 2025-02-02
+published: 2025-02-02
 tags: ['随笔', '开始']
+category: 随笔
 ---
 
 ## 欢迎来到 Kraken 的空间
@@ -18,3 +19,4 @@ tags: ['随笔', '开始']
 ```javascript
 // 甚至可以放代码块
 console.log('Hello, World!');
+```

@@ -1,8 +1,9 @@
 ---
 title: Astro 学习笔记
 description: 从零开始搭建个人博客的历程
-pubDate: 2025-02-03
+published: 2025-02-03
 tags: ['Astro', '前端']
+category: 技术
 ---
 
 ## 为什么选择 Astro？
