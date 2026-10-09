@@ -8,7 +8,7 @@ export const profileConfig: ProfileConfig = {
 	name: "Kraken",
 
 	// 个人签名
-	bio: "记录技术探索、生活瞬间和奇思妙想。",
+	bio: "记录技术探索|生活瞬间|奇思妙想",
 
 	// 链接配置
 	// 已经预装的图标集：fa7-brands，fa7-regular，fa7-solid，material-symbols，simple-icons
