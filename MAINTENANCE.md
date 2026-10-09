@@ -191,6 +191,7 @@ comment: true              # false 关闭本文评论
 | 本地项目页显示"GitHub 拉取失败" | 正常——本地代理拦截，CI 上没问题 |
 | 新评论没出现在计数里 | 需要 push 一次触发重新部署 |
 | 搜索不到新文章 | 索引随构建生成，push 后即更新 |
-| 改了配置没变化 | `pnpm dev` 有时需重启；确认 push 成功且 Actions 变绿 |
+| 改了配置没变化 | `pnpm dev` 有时需重启；确认 push 成功且 Actions 变绿；线上页面有最长约 10 分钟的缓存，强刷或稍等 |
+| 发布后归档/时间线/最后活动没立刻更新 | 同上：GitHub Pages 对 HTML 设了约 10 分钟的缓存（max-age=600），部署后稍等或 Ctrl+F5 强刷，属正常现象 |
 | 想换回纯色无背景 | `backgroundWallpaper.ts` 的 `mode: "none"` |
 | 访问统计数字不显示 | 多刷新几次；数字异步填充有 1-2 秒延迟；广告拦截插件可能拦截 vercount.one |
