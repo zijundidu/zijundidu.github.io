@@ -491,7 +491,7 @@ export const ru: Translation = {
 	[Key.calendarNovember]: "Ноя",
 	[Key.calendarDecember]: "Дек",
 	[Key.calendar]: "Календарь сайта",
-	[Key.calendarHeatmapWeek]: "Неделя {week} {month}, {count} записей",
+	[Key.calendarHeatmapWeek]: "Неделя {week} {month}: записей {posts} · заметок {dynamics}",
 	[Key.advertisement]: "Реклама",
 
 	[Key.shareArticle]: "Поделиться",

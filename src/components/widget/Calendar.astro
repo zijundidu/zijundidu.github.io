@@ -179,15 +179,18 @@ const dynamicLabel = i18n(I18nKey.dynamic);
       `<span class="text-[10px] text-neutral-400 dark:text-neutral-500 text-center">${i + 1}</span>`
     ).join('');
 
-    // Build weekly post counts: heatmapData[month][week] = count
-    const heatmapData = Array.from({ length: 12 }, () => [0, 0, 0, 0]);
+    // Build weekly counts: heatmapData[month][week] = { posts, dynamics }
+    const heatmapData = Array.from({ length: 12 }, () =>
+      Array.from({ length: 4 }, () => ({ posts: 0, dynamics: 0 })),
+    );
     allPostsData.forEach(post => {
       const date = new Date(post.published);
       if (date.getFullYear() !== displayYear) return;
       const month = date.getMonth();
       const day = date.getDate();
       const week = Math.min(Math.floor((day - 1) / 7), 3); // 0-3
-      heatmapData[month][week]++;
+      if (post.type === 'dynamic') heatmapData[month][week].dynamics++;
+      else heatmapData[month][week].posts++;
     });
 
     // Find max for scaling
@@ -197,7 +200,8 @@ const dynamicLabel = i18n(I18nKey.dynamic);
     let cellsHtml = '';
     for (let week = 0; week < 4; week++) {
       for (let month = 0; month < 12; month++) {
-        const count = heatmapData[month][week];
+        const { posts, dynamics } = heatmapData[month][week];
+        const count = posts + dynamics;
         const level = Math.min(count, 4);
         const bgStyle = count === 0
           ? 'background-color: var(--btn-plain-bg-hover)'
@@ -206,7 +210,8 @@ const dynamicLabel = i18n(I18nKey.dynamic);
         const tooltip = heatmapWeekTemplate
           .replace('{month}', month + 1)
           .replace('{week}', week + 1)
-          .replace('{count}', count);
+          .replace('{posts}', posts)
+          .replace('{dynamics}', dynamics);
         cellsHtml += `<div class="heatmap-cell rounded-sm" style="${bgStyle}" data-tooltip="${tooltip}" data-month="${month}"></div>`;
       }
     }

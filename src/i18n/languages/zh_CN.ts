@@ -479,7 +479,7 @@ export const zh_CN: Translation = {
 	[Key.calendarNovember]: "11月",
 	[Key.calendarDecember]: "12月",
 	[Key.calendar]: "站点日历",
-	[Key.calendarHeatmapWeek]: "{month}月第{week}周，{count}篇文章",
+	[Key.calendarHeatmapWeek]: "{month}月第{week}周，{posts}篇文章 · {dynamics}条动态",
 	[Key.advertisement]: "广告",
 
 	[Key.shareArticle]: "分享",
