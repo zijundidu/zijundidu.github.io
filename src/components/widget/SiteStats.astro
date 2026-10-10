@@ -1,5 +1,6 @@
 ---
 import { Icon } from "astro-icon/components";
+import { getCollection } from "astro:content";
 import WidgetLayout from "@/components/common/WidgetLayout.astro";
 import { siteConfig } from "@/config";
 import I18nKey from "@/i18n/i18nKey";
@@ -76,18 +77,26 @@ function formatNumber(num: number): string {
 	return num.toLocaleString();
 }
 
-// 获取「最后活动」时间：取每篇文章 published 与 updated 中较新的那个，再从全站所有文章里取最大值。这样新发文章和修改老文章都会刷新该字段。
+// 获取「最后活动」时间：文章取 published 与 updated 中较新的那个，动态取 published，
+// 再从全部内容里取最大值。这样新发文章/动态和修改老文章都会刷新该字段。
 const getActivityDate = (post: (typeof posts)[number]): Date => {
 	const { published, updated } = post.data;
 	if (updated && updated > published) return updated;
 	return published;
 };
 
-const lastActivityDate = posts.reduce<Date | null>((latest, post) => {
+const dynamics = await getCollection("dynamic");
+
+let lastActivityDate = posts.reduce<Date | null>((latest, post) => {
 	const current = getActivityDate(post);
 	if (!latest || current > latest) return current;
 	return latest;
 }, null);
+for (const d of dynamics) {
+	if (!lastActivityDate || d.data.published > lastActivityDate) {
+		lastActivityDate = d.data.published;
+	}
+}
 
 const lastPostDate = lastActivityDate ? lastActivityDate.toISOString() : null;
 

@@ -56,6 +56,8 @@ const currentLang = siteConfig.lang || "en";
 
 const calendarDataUrl = url("/api/allPostMeta.json");
 const postUrlPrefix = url("/posts/");
+const dynamicUrl = url("/dynamic/");
+const dynamicLabel = i18n(I18nKey.dynamic);
 ---
 
 <WidgetLayout name={i18n(I18nKey.calendar)} showTitle={showTitle} id="calendar-widget" class={className} style={style}>
@@ -121,7 +123,7 @@ const postUrlPrefix = url("/posts/");
   </div>
 </WidgetLayout>
 
-<script is:inline data-swup-ignore-script define:vars={{ monthNames, weekDays, yearText, currentLang, calendarDataUrl, postUrlPrefix, heatmapWeekTemplate }}>
+<script is:inline data-swup-ignore-script define:vars={{ monthNames, weekDays, yearText, currentLang, calendarDataUrl, postUrlPrefix, dynamicUrl, dynamicLabel, heatmapWeekTemplate }}>
   // State variables
   let displayYear = new Date().getFullYear();
   let displayMonth = new Date().getMonth();
@@ -150,7 +152,7 @@ const postUrlPrefix = url("/posts/");
         if (!postDateMap[dateKey]) {
           postDateMap[dateKey] = [];
         }
-        postDateMap[dateKey].push({ id: post.id, title: post.title, published: post.published });
+        postDateMap[dateKey].push({ id: post.id, type: post.type, title: post.title, published: post.published });
         yearsSet.add(date.getFullYear());
       });
       
@@ -475,12 +477,12 @@ const postUrlPrefix = url("/posts/");
         const date = new Date(post.published);
         const dateStr = `${date.getMonth() + 1}-${date.getDate()}`;
         return `
-        <a href="${postUrlPrefix}${post.id}/" class="flex justify-between items-center text-sm text-neutral-700 dark:text-neutral-300 hover:text-(--primary) dark:hover:text-(--primary) transition-colors px-2 py-1 rounded-sm hover:bg-(--btn-plain-bg-hover)">
-          <span class="truncate">${post.title}</span>
+        <a href="${post.type === 'dynamic' ? dynamicUrl : `${postUrlPrefix}${post.id}/`}" class="flex justify-between items-center text-sm text-neutral-700 dark:text-neutral-300 hover:text-(--primary) dark:hover:text-(--primary) transition-colors px-2 py-1 rounded-sm hover:bg-(--btn-plain-bg-hover)">
+          <span class="truncate">${post.type === 'dynamic' ? `<span class="shrink-0 text-[10px] leading-4 px-1 mr-1 rounded text-white bg-(--primary)">${dynamicLabel}</span>` : ''}${post.title}</span>
           <span class="text-xs text-neutral-500 dark:text-neutral-400 ml-2 whitespace-nowrap">${dateStr}</span>
         </a>
       `}).join('');
-      
+
       // 显示/隐藏分割线
       if (divider) {
         divider.style.display = currentMonthPosts.length > 0 ? 'block' : 'none';
@@ -535,8 +537,8 @@ const postUrlPrefix = url("/posts/");
             const date = new Date(post.published);
             const dateStr = `${date.getMonth() + 1}-${date.getDate()}`;
             return `
-            <a href="${postUrlPrefix}${post.id}/" class="flex justify-between items-center text-sm text-neutral-700 dark:text-neutral-300 hover:text-(--primary) dark:hover:text-(--primary) transition-colors px-2 py-1 rounded-sm hover:bg-(--btn-plain-bg-hover)">
-              <span class="truncate">${post.title}</span>
+            <a href="${post.type === 'dynamic' ? dynamicUrl : `${postUrlPrefix}${post.id}/`}" class="flex justify-between items-center text-sm text-neutral-700 dark:text-neutral-300 hover:text-(--primary) dark:hover:text-(--primary) transition-colors px-2 py-1 rounded-sm hover:bg-(--btn-plain-bg-hover)">
+              <span class="truncate">${post.type === 'dynamic' ? `<span class="shrink-0 text-[10px] leading-4 px-1 mr-1 rounded text-white bg-(--primary)">${dynamicLabel}</span>` : ''}${post.title}</span>
               <span class="text-xs text-neutral-500 dark:text-neutral-400 ml-2 whitespace-nowrap">${dateStr}</span>
             </a>
           `}).join('');
