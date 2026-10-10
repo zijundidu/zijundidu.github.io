@@ -43,9 +43,20 @@ const tags = await getTagList();
 let totalWords = 0;
 for (const post of posts) {
 	if (post.body) {
-		const text = post.body
-			.replace(/```[\s\S]*?```/g, " ") // 代码块
-			.replace(/`[^`]*`/g, " ") // 行内代码
+		// 按行剔除围栏代码块：只有行首的 ``` 才算围栏开关，
+		// 正文里演示 ``` 语法（如 "```mermaid 代码块"）不会被误吞
+		let inFence = false;
+		const keptLines: string[] = [];
+		for (const line of post.body.split("\n")) {
+			if (/^ {0,3}```/.test(line)) {
+				inFence = !inFence;
+				continue;
+			}
+			if (!inFence) keptLines.push(line);
+		}
+		const text = keptLines
+			.join("\n")
+			.replace(/`[^`\n]*`/g, " ") // 行内代码
 			.replace(/!\[[^\]]*\]\([^)]*\)/g, " ") // 图片
 			.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1") // 链接只保留锚文本
 			.replace(/https?:\/\/\S+/g, " ") // 裸链接
