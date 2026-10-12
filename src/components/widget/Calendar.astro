@@ -152,7 +152,7 @@ const dynamicLabel = i18n(I18nKey.dynamic);
         if (!postDateMap[dateKey]) {
           postDateMap[dateKey] = [];
         }
-        postDateMap[dateKey].push({ id: post.id, type: post.type, title: post.title, published: post.published });
+        postDateMap[dateKey].push({ id: post.id, type: post.type, title: post.title, published: post.published, url: post.url });
         yearsSet.add(date.getFullYear());
       });
       
@@ -482,7 +482,7 @@ const dynamicLabel = i18n(I18nKey.dynamic);
         const date = new Date(post.published);
         const dateStr = `${date.getMonth() + 1}-${date.getDate()}`;
         return `
-        <a href="${post.type === 'dynamic' ? dynamicUrl : `${postUrlPrefix}${post.id}/`}" class="flex justify-between items-center text-sm text-neutral-700 dark:text-neutral-300 hover:text-(--primary) dark:hover:text-(--primary) transition-colors px-2 py-1 rounded-sm hover:bg-(--btn-plain-bg-hover)">
+        <a href="${post.url || (post.type === 'dynamic' ? dynamicUrl : `${postUrlPrefix}${post.id}/`)}" class="flex justify-between items-center text-sm text-neutral-700 dark:text-neutral-300 hover:text-(--primary) dark:hover:text-(--primary) transition-colors px-2 py-1 rounded-sm hover:bg-(--btn-plain-bg-hover)">
           <span class="truncate">${post.type === 'dynamic' ? `<span class="shrink-0 text-[10px] leading-4 px-1 mr-1 rounded text-white bg-(--primary)">${dynamicLabel}</span>` : ''}${post.title}</span>
           <span class="text-xs text-neutral-500 dark:text-neutral-400 ml-2 whitespace-nowrap">${dateStr}</span>
         </a>
@@ -542,7 +542,7 @@ const dynamicLabel = i18n(I18nKey.dynamic);
             const date = new Date(post.published);
             const dateStr = `${date.getMonth() + 1}-${date.getDate()}`;
             return `
-            <a href="${post.type === 'dynamic' ? dynamicUrl : `${postUrlPrefix}${post.id}/`}" class="flex justify-between items-center text-sm text-neutral-700 dark:text-neutral-300 hover:text-(--primary) dark:hover:text-(--primary) transition-colors px-2 py-1 rounded-sm hover:bg-(--btn-plain-bg-hover)">
+            <a href="${post.url || (post.type === 'dynamic' ? dynamicUrl : `${postUrlPrefix}${post.id}/`)}" class="flex justify-between items-center text-sm text-neutral-700 dark:text-neutral-300 hover:text-(--primary) dark:hover:text-(--primary) transition-colors px-2 py-1 rounded-sm hover:bg-(--btn-plain-bg-hover)">
               <span class="truncate">${post.type === 'dynamic' ? `<span class="shrink-0 text-[10px] leading-4 px-1 mr-1 rounded text-white bg-(--primary)">${dynamicLabel}</span>` : ''}${post.title}</span>
               <span class="text-xs text-neutral-500 dark:text-neutral-400 ml-2 whitespace-nowrap">${dateStr}</span>
             </a>

@@ -86,6 +86,7 @@ const getActivityDate = (post: (typeof posts)[number]): Date => {
 };
 
 const dynamics = await getCollection("dynamic");
+const travels = await getCollection("travel");
 
 let lastActivityDate = posts.reduce<Date | null>((latest, post) => {
 	const current = getActivityDate(post);
@@ -95,6 +96,11 @@ let lastActivityDate = posts.reduce<Date | null>((latest, post) => {
 for (const d of dynamics) {
 	if (!lastActivityDate || d.data.published > lastActivityDate) {
 		lastActivityDate = d.data.published;
+	}
+}
+for (const t of travels) {
+	if (!lastActivityDate || t.data.date > lastActivityDate) {
+		lastActivityDate = t.data.date;
 	}
 }
 
