@@ -29,19 +29,20 @@ for (const [slug, list] of byProvince) {
 // 全国总览
 const allStats = calcStats(records);
 
-// ---- GeoJSON → SVG path（等距圆柱投影，视觉足够准确）----
+// ---- GeoJSON → SVG path（经度乘 cos(35°) 修正东西拉伸，形状接近真实比例）----
 const K = 14;
+const COS_LAT = 0.82;
 const project = (lon: number, lat: number): [number, number] => [
-	(lon - 73) * K,
+	(lon - 73) * K * COS_LAT,
 	(54 - lat) * K,
 ];
 
 type Ring = number[][];
-function ringPath(ring: Ring): string {
+function ringPath(ring: Ring, pj: (lon: number, lat: number) => [number, number] = project): string {
 	return (
 		ring
 			.map((pt, i) => {
-				const [x, y] = project(pt[0], pt[1]);
+				const [x, y] = pj(pt[0], pt[1]);
 				return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
 			})
 			.join(" ") + " Z"
@@ -52,41 +53,84 @@ interface ProvPath {
 	slug: string;
 	name: string;
 	d: string;
+	centroid: [number, number] | null;
 	visited: boolean;
 }
 const provincePaths: ProvPath[] = [];
-const linePaths: string[] = [];
+let southChinaSea: { d: string; bounds: string } | null = null;
 
 for (const f of chinaGeo.features as {
 	name: string;
+	adcode: number | string;
+	center: [number, number] | null;
 	geometry: { type: string; coordinates: unknown };
 }[]) {
 	const { type, coordinates } = f.geometry;
+	// 南海诸岛（九段线+群岛）：不进主图，画到右下角附图
+	if (f.adcode === "100000_JD" || !f.name) {
+		const polys = coordinates as Ring[][];
+		let minLon = 180,
+			maxLon = -180,
+			minLat = 90,
+			maxLat = -180;
+		for (const poly of polys) {
+			for (const ring of poly) {
+				for (const [lon, lat] of ring) {
+					if (lon < minLon) minLon = lon;
+					if (lon > maxLon) maxLon = lon;
+					if (lat < minLat) minLat = lat;
+					if (lat > maxLat) maxLat = lat;
+				}
+			}
+		}
+		// 适配到右下角附图框（保持宽高比）
+		const BX = 590,
+			BY = 385,
+			BW = 260,
+			BH = 135;
+		const scale = Math.min(BW / (maxLon - minLon), BH / (maxLat - minLat));
+		const offX = BX + (BW - (maxLon - minLon) * scale) / 2;
+		const offY = BY + (BH - (maxLat - minLat) * scale) / 2;
+		const jdProject = (lon: number, lat: number): [number, number] => [
+			offX + (lon - minLon) * scale,
+			offY + (maxLat - lat) * scale,
+		];
+		southChinaSea = {
+			d: polys.map((poly) => poly.map((r) => ringPath(r, jdProject)).join(" ")).join(" "),
+			bounds: `${BX} ${BY} ${BW} ${BH}`,
+		};
+		continue;
+	}
 	const p = provinceByGeoName(f.name);
+	const centroid: [number, number] | null = f.center
+		? project(f.center[0], f.center[1])
+		: null;
+	// 剔除 lat<16° 的南海岛礁（三沙等），它们画进右下角南海附图，避免撑破主图
+	const mainLand = (polys: Ring[][]) =>
+		polys.filter((poly) => (poly[0]?.[0]?.[1] ?? 90) > 16);
 	if (type === "Polygon") {
 		provincePaths.push({
 			slug: p?.slug ?? "",
 			name: p?.shortName ?? f.name,
-			d: (coordinates as Ring[]).map(ringPath).join(" "),
+			d: (coordinates as Ring[]).map((r) => ringPath(r)).join(" "),
+			centroid,
 			visited: p ? !!statsBySlug[p.slug] : false,
 		});
 	} else if (type === "MultiPolygon") {
 		provincePaths.push({
 			slug: p?.slug ?? "",
 			name: p?.shortName ?? f.name,
-			d: (coordinates as Ring[][])
-				.map((poly) => poly.map(ringPath).join(" "))
+			d: mainLand(coordinates as Ring[][])
+				.map((poly) => poly.map((r) => ringPath(r)).join(" "))
 				.join(" "),
+			centroid,
 			visited: p ? !!statsBySlug[p.slug] : false,
 		});
-	} else if (type === "LineString") {
-		linePaths.push(ringPath(coordinates as Ring));
-	} else if (type === "MultiLineString") {
-		linePaths.push(
-			(coordinates as Ring[]).map(ringPath).join(" "),
-		);
 	}
 }
+
+// 已点亮省份的中心热区（港澳等面积太小，path 不好点）
+const hotspots = provincePaths.filter((p) => p.visited && p.centroid);
 ---
 
 <MainGridLayout
@@ -95,31 +139,36 @@ for (const f of chinaGeo.features as {
 >
 	<section class="page-shell" aria-labelledby="travel-page-title">
 		<div>
-			<header class="page-header card-base">
+			<header class="page-header card-base travel-header">
 				<div class="page-heading">
 					<div class="page-icon" aria-hidden="true">
 						<Icon name="material-symbols:travel-explore-rounded" />
 					</div>
 					<div>
 						<h2 id="travel-page-title">诗与远方</h2>
-						<p>在地图上点亮走过的每一寸土地</p>
+						<p>山河远阔，步履不停</p>
 					</div>
 				</div>
-				<div class="page-count" aria-label="足迹统计">
-					<Icon name="material-symbols:location-on-rounded" />
-					<strong>{allStats.places}</strong>
-					<span>个地方 ·</span>
-					<strong>{allStats.total}</strong>
-					<span>次出行 ·</span>
-					<strong>{byProvince.size}</strong>
-					<span>个省份</span>
+				<div class="travel-overview">
+					<div class="stat-chip">
+						<strong>{byProvince.size}</strong>
+						<span>省份</span>
+					</div>
+					<div class="stat-chip">
+						<strong>{allStats.places}</strong>
+						<span>地方</span>
+					</div>
+					<div class="stat-chip">
+						<strong>{allStats.total}</strong>
+						<span>出行</span>
+					</div>
 				</div>
 			</header>
 
 			<div class="card-base mt-4 p-4 md:p-6">
 				<svg
 					id="china-map"
-					viewBox="0 0 880 530"
+					viewBox="-15 -15 900 555"
 					class="w-full h-auto select-none"
 					role="img"
 					aria-label="中国地图"
@@ -131,13 +180,38 @@ for (const f of chinaGeo.features as {
 								class:list={["province", { visited: p.visited }]}
 								data-slug={p.slug}
 								data-name={p.name}
+								data-visited={p.visited}
 							/>
 						))
 					}
-					{linePaths.map((d) => <path d={d} class="map-line" />)}
+					{
+						hotspots.map((h) => (
+							<circle
+								cx={h.centroid?.[0]}
+								cy={h.centroid?.[1]}
+								r="13"
+								class="hotspot"
+								data-slug={h.slug}
+								data-name={h.name}
+								data-visited="true"
+							/>
+						))
+					}
+					{
+						southChinaSea && (
+							<g class="south-china-sea">
+								<path d={southChinaSea.d} class="scs-islands" />
+								<text x="720" y="528" text-anchor="middle" class="scs-label">
+									南海诸岛
+								</text>
+							</g>
+						)
+					}
 				</svg>
 
-				<div class="flex items-center gap-4 mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+				<div
+					class="flex items-center gap-4 mt-2 text-xs text-neutral-500 dark:text-neutral-400"
+				>
 					<span class="flex items-center gap-1">
 						<span class="inline-block w-3 h-3 rounded-sm legend-visited"></span>
 						已有足迹（点击可进）
@@ -177,45 +251,83 @@ for (const f of chinaGeo.features as {
 				document.body.appendChild(tip);
 			}
 
-			map.querySelectorAll(".province").forEach((el) => {
-				const visited = el.classList.contains("visited");
-				const name = el.getAttribute("data-name");
-				const slug = el.getAttribute("data-slug");
+			map
+				.querySelectorAll(".province, .hotspot")
+				.forEach((el) => {
+					// Swup 切页会重跑脚本，防止同一元素重复绑定
+					if (el.__travelBound) return;
+					el.__travelBound = true;
 
-				el.addEventListener("mouseenter", () => {
-					if (visited) {
-						const s = statsBySlug[slug];
-						tip.innerHTML =
-							`<div style="font-weight:600;margin-bottom:2px">${name}</div>` +
-							`<div style="opacity:0.85">已游览 ${s.places} 个地方 · 徒步 ${s.hike} 次 · 登山 ${s.climb} 次 · 自驾 ${s.drive} 次</div>`;
-					} else {
-						tip.innerHTML =
-							`<div style="font-weight:600;margin-bottom:2px">${name}</div>` +
-							`<div style="opacity:0.7">还没有足迹</div>`;
-					}
-					tip.style.opacity = "1";
-					const rect = el.getBoundingClientRect();
-					tip.style.left =
-						rect.left + rect.width / 2 - tip.offsetWidth / 2 + "px";
-					tip.style.top = rect.top - tip.offsetHeight - 8 + "px";
-				});
-				el.addEventListener("mouseleave", () => {
-					tip.style.opacity = "0";
-				});
+					const visited = el.getAttribute("data-visited") === "true";
+					const name = el.getAttribute("data-name");
+					const slug = el.getAttribute("data-slug");
 
-				if (visited) {
-					el.addEventListener("click", () => {
-						const url = `/travel/${slug}/`;
-						if (window.swup) window.swup.visit(url);
-						else window.location.href = url;
+					el.addEventListener("mouseenter", () => {
+						if (visited) {
+							const s = statsBySlug[slug];
+							tip.innerHTML =
+								`<div style="font-weight:600;margin-bottom:2px">${name}</div>` +
+								`<div style="opacity:0.85">已游览 ${s.places} 个地方 · 徒步 ${s.hike} 次 · 登山 ${s.climb} 次 · 自驾 ${s.drive} 次</div>`;
+						} else {
+							tip.innerHTML =
+								`<div style="font-weight:600;margin-bottom:2px">${name}</div>` +
+								`<div style="opacity:0.7">还没有足迹</div>`;
+						}
+						tip.style.opacity = "1";
+						const rect = el.getBoundingClientRect();
+						tip.style.left =
+							rect.left + rect.width / 2 - tip.offsetWidth / 2 + "px";
+						tip.style.top = rect.top - tip.offsetHeight - 8 + "px";
 					});
-					el.style.cursor = "pointer";
-				}
-			});
+					el.addEventListener("mouseleave", () => {
+						tip.style.opacity = "0";
+					});
+
+					if (visited) {
+						el.addEventListener("click", () => {
+							const url = `/travel/${slug}/`;
+							// Swup 3 的跳转 API 是 navigate()（visit 不存在）
+							if (window.swup && typeof window.swup.navigate === "function") {
+								window.swup.navigate(url);
+							} else {
+								window.location.href = url;
+							}
+						});
+						el.style.cursor = "pointer";
+					}
+				});
 		}
 	</script>
 
 	<style>
+		.travel-header {
+			flex-wrap: wrap;
+			gap: 1rem;
+		}
+		.travel-overview {
+			display: flex;
+			gap: 0.5rem;
+		}
+		.stat-chip {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			min-width: 4.5rem;
+			padding: 0.5rem 0.9rem;
+			border-radius: 0.75rem;
+			background: color-mix(in srgb, var(--primary) 8%, transparent);
+		}
+		.stat-chip strong {
+			font-size: 1.25rem;
+			font-weight: 700;
+			color: var(--primary);
+			line-height: 1.2;
+		}
+		.stat-chip span {
+			font-size: 0.72rem;
+			color: var(--neutral-500, #737373);
+		}
 		.province {
 			fill: var(--btn-plain-bg-hover);
 			stroke: #ffffff;
@@ -228,11 +340,20 @@ for (const f of chinaGeo.features as {
 		.province.visited:hover {
 			fill: var(--primary);
 		}
-		.map-line {
-			fill: none;
-			stroke: color-mix(in srgb, var(--primary) 40%, transparent);
-			stroke-width: 1;
-			stroke-dasharray: 3 3;
+		/* 面积小的省份用透明圆扩大点击/悬停热区 */
+		.hotspot {
+			fill: transparent;
+			pointer-events: all;
+		}
+		.scs-islands {
+			fill: color-mix(in srgb, var(--primary) 25%, transparent);
+			stroke: color-mix(in srgb, var(--primary) 45%, transparent);
+			stroke-width: 0.8;
+			stroke-dasharray: 2 2;
+		}
+		.scs-label {
+			font-size: 12px;
+			fill: var(--neutral-400, #a3a3a3);
 		}
 		.legend-visited {
 			background: color-mix(in srgb, var(--primary) 55%, transparent);
