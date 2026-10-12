@@ -196,6 +196,8 @@ comment: true              # false 关闭本文评论
 | 发布后归档/时间线/最后活动没立刻更新 | 同上：GitHub Pages 对 HTML 设了约 10 分钟的缓存（max-age=600），部署后稍等或 Ctrl+F5 强刷，属正常现象 |
 | 想换回纯色无背景 | `backgroundWallpaper.ts` 的 `mode: "none"` |
 | 访问统计数字不显示 | 多刷新几次；数字异步填充有 1-2 秒延迟；广告拦截插件可能拦截 vercount.one |
+| 本地 `pnpm build` 报 `CannotFetchFontFile`（cdn.jsdelivr.net） | 构建时下载的字体缓存在 `node_modules/.astro/fonts`，**不要删 `node_modules/.astro` 目录**；缓存被删后本地因网络访问不了 jsdelivr 会失败，属本地现象，CI 不受影响，push 后 Actions 会正常变绿 |
+| Actions 构建失败：`wrangler does not satisfy the peer dependency required by @cloudflare/vite-plugin` | dependabot 更新依赖后，传递依赖的 wrangler 版本要求被抬高。把 `package.json` 里的 `wrangler` 升级到提示的最低版本（如 `^4.147.0`），`pnpm install` 后重新 push 即可 |
 
 ### 5.9 站点资源地图（图片/内容放哪）
 
