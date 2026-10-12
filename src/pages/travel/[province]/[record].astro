@@ -1,0 +1,90 @@
+---
+import { getCollection, render } from "astro:content";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import Markdown from "@components/common/Markdown.astro";
+import { Icon } from "astro-icon/components";
+import { TRAVEL_TYPE_STYLE, provinceByShort } from "@/utils/travel-utils";
+
+export async function getStaticPaths() {
+	const records = await getCollection("travel");
+	return records.map((entry) => {
+		const p = provinceByShort(entry.data.province);
+		return {
+			params: { province: p?.slug ?? entry.data.province, record: entry.id },
+			props: { entry },
+		};
+	});
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const provinceInfo = provinceByShort(entry.data.province);
+const provinceSlug = provinceInfo?.slug ?? entry.data.province;
+
+function fmt(d: Date): string {
+	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+---
+
+<MainGridLayout
+	title={`${entry.data.title} · 诗与远方`}
+	description={entry.data.description || entry.data.title}
+>
+	<section class="page-shell" aria-labelledby="record-title">
+		<div>
+			<div class="card-base p-6 md:p-9 mb-4">
+				<a
+					href={`/travel/${provinceSlug}/`}
+					class="btn-plain rounded-lg px-3 py-2 text-sm inline-flex items-center gap-1 mb-4"
+				>
+					<Icon name="fa7-solid:arrow-left" class="text-xs" />
+					返回{provinceInfo?.shortName ?? entry.data.province}
+				</a>
+				<div class="flex items-center gap-2 flex-wrap mb-2">
+					<span
+						class:list={[
+							"text-xs font-medium px-2 py-0.5 rounded-full",
+							TRAVEL_TYPE_STYLE[entry.data.type],
+						]}
+					>
+						{entry.data.type}
+					</span>
+					<h2
+						id="record-title"
+						class="text-2xl font-bold text-neutral-900 dark:text-neutral-100"
+					>
+						{entry.data.title}
+					</h2>
+				</div>
+				<div
+					class="flex items-center gap-4 text-sm text-neutral-500 dark:text-neutral-400"
+				>
+					<span class="flex items-center gap-1">
+						<Icon
+							name="material-symbols:calendar-month-outline-rounded"
+							class="text-base"
+						/>
+						{fmt(entry.data.date)}
+					</span>
+					{
+						entry.data.location && (
+							<span class="flex items-center gap-1">
+								<Icon
+									name="material-symbols:location-on-outline-rounded"
+									class="text-base"
+								/>
+								{entry.data.location}
+							</span>
+						)
+					}
+				</div>
+			</div>
+
+			<div class="card-base px-6 md:px-9 py-6">
+				<Markdown class="markdown-content onload-animation">
+					<Content />
+				</Markdown>
+			</div>
+		</div>
+	</section>
+</MainGridLayout>

@@ -35,6 +35,16 @@ type DynamicData = {
 	location: string;
 };
 
+type TravelData = {
+	title: string;
+	province: string;
+	type: string;
+	date: Date;
+	location: string;
+	description: string;
+	image: string;
+};
+
 type ProjectLink = {
 	label: string;
 	icon: string;
@@ -105,6 +115,20 @@ const dynamicCollection: ContentCollection<DynamicData> = defineCollection({
 	}),
 });
 
+// 诗与远方：旅行/徒步/登山/自驾记录，按省份聚合
+const travelCollection: ContentCollection<TravelData> = defineCollection({
+	loader: glob({ pattern: "**/*.md", base: "./src/content/travel" }),
+	schema: z.object({
+		title: z.string(),
+		province: z.string(), // 常用名，如"四川"，见 src/utils/travel-utils.ts
+		type: z.enum(["旅行", "徒步", "登山", "自驾"]),
+		date: z.date(),
+		location: z.string().default(""),
+		description: z.string().default(""),
+		image: z.string().default(""),
+	}),
+});
+
 const projectsCollection: ContentCollection<ProjectData> = defineCollection({
 	loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/projects" }),
 	schema: z.object({
@@ -135,9 +159,11 @@ export const collections: {
 	posts: typeof postsCollection;
 	spec: typeof specCollection;
 	projects: typeof projectsCollection;
+	travel: typeof travelCollection;
 } = {
 	dynamic: dynamicCollection,
 	posts: postsCollection,
 	spec: specCollection,
 	projects: projectsCollection,
+	travel: travelCollection,
 };

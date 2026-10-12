@@ -1,0 +1,113 @@
+---
+import { getCollection } from "astro:content";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import { Icon } from "astro-icon/components";
+import {
+	TRAVEL_TYPE_STYLE,
+	calcStats,
+	provinceByShort,
+	provinceBySlug,
+} from "@/utils/travel-utils";
+
+export async function getStaticPaths() {
+	const records = await getCollection("travel");
+	const slugs = new Set<string>();
+	for (const r of records) {
+		const p = provinceByShort(r.data.province);
+		if (p) slugs.add(p.slug);
+	}
+	return Array.from(slugs).map((slug) => ({ params: { province: slug } }));
+}
+
+const { province } = Astro.params;
+const info = provinceBySlug(province ?? "");
+const all = await getCollection("travel");
+const list = all
+	.filter((r) => provinceByShort(r.data.province)?.slug === province)
+	.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const stats = calcStats(list);
+
+function fmt(d: Date): string {
+	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+---
+
+<MainGridLayout
+	title={`诗与远方 · ${info?.shortName ?? province}`}
+	description={`${info?.shortName ?? province}的旅行记录`}
+>
+	<section class="page-shell" aria-labelledby="province-page-title">
+		<div>
+			<header class="page-header card-base">
+				<div class="page-heading">
+					<div class="page-icon" aria-hidden="true">
+						<Icon name="material-symbols:travel-rounded" />
+					</div>
+					<div>
+						<h2 id="province-page-title">{info?.shortName ?? province}</h2>
+						<p>
+							已游览 {stats.places} 个地方 · 徒步 {stats.hike} 次 · 登山 {
+								stats.climb
+							} 次 · 自驾 {stats.drive} 次
+						</p>
+					</div>
+				</div>
+				<a
+					href="/travel/"
+					class="btn-plain rounded-lg px-3 py-2 text-sm flex items-center gap-1"
+				>
+					<Icon name="fa7-solid:arrow-left" class="text-xs" />
+					返回地图
+				</a>
+			</header>
+
+			<div class="flex flex-col gap-3 mt-4">
+				{
+					list.map((r) => (
+						<a
+							href={`/travel/${province}/${r.id}/`}
+							class="card-base p-4 md:p-5 flex flex-col gap-2 hover:shadow-lg transition-shadow onload-animation"
+						>
+							<div class="flex items-center gap-2 flex-wrap">
+								<span
+									class:list={[
+										"text-xs font-medium px-2 py-0.5 rounded-full",
+										TRAVEL_TYPE_STYLE[r.data.type],
+									]}
+								>
+									{r.data.type}
+								</span>
+								<h3 class="text-lg font-bold text-neutral-900 dark:text-neutral-100">
+									{r.data.title}
+								</h3>
+							</div>
+							<div class="flex items-center gap-3 text-xs text-neutral-500 dark:text-neutral-400">
+								<span class="flex items-center gap-1">
+									<Icon
+										name="material-symbols:calendar-month-outline-rounded"
+										class="text-sm"
+									/>
+									{fmt(r.data.date)}
+								</span>
+								{r.data.location && (
+									<span class="flex items-center gap-1">
+										<Icon
+											name="material-symbols:location-on-outline-rounded"
+											class="text-sm"
+										/>
+										{r.data.location}
+									</span>
+								)}
+							</div>
+							{r.data.description && (
+								<p class="text-sm text-neutral-600 dark:text-neutral-300 line-clamp-2">
+									{r.data.description}
+								</p>
+							)}
+						</a>
+					))
+				}
+			</div>
+		</div>
+	</section>
+</MainGridLayout>

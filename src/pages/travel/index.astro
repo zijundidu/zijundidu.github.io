@@ -1,0 +1,244 @@
+---
+import { getCollection } from "astro:content";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import { Icon } from "astro-icon/components";
+import {
+	type TravelStats,
+	calcStats,
+	provinceByGeoName,
+	provinceByShort,
+} from "@/utils/travel-utils";
+import chinaGeo from "@/data/china-provinces.json";
+
+const records = await getCollection("travel");
+
+// 按省聚合统计
+const byProvince = new Map<string, typeof records>();
+for (const r of records) {
+	const p = provinceByShort(r.data.province);
+	if (!p) continue;
+	const list = byProvince.get(p.slug) ?? [];
+	list.push(r);
+	byProvince.set(p.slug, list);
+}
+const statsBySlug: Record<string, TravelStats> = {};
+for (const [slug, list] of byProvince) {
+	statsBySlug[slug] = calcStats(list);
+}
+
+// 全国总览
+const allStats = calcStats(records);
+
+// ---- GeoJSON → SVG path（等距圆柱投影，视觉足够准确）----
+const K = 14;
+const project = (lon: number, lat: number): [number, number] => [
+	(lon - 73) * K,
+	(54 - lat) * K,
+];
+
+type Ring = number[][];
+function ringPath(ring: Ring): string {
+	return (
+		ring
+			.map((pt, i) => {
+				const [x, y] = project(pt[0], pt[1]);
+				return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+			})
+			.join(" ") + " Z"
+	);
+}
+
+interface ProvPath {
+	slug: string;
+	name: string;
+	d: string;
+	visited: boolean;
+}
+const provincePaths: ProvPath[] = [];
+const linePaths: string[] = [];
+
+for (const f of chinaGeo.features as {
+	name: string;
+	geometry: { type: string; coordinates: unknown };
+}[]) {
+	const { type, coordinates } = f.geometry;
+	const p = provinceByGeoName(f.name);
+	if (type === "Polygon") {
+		provincePaths.push({
+			slug: p?.slug ?? "",
+			name: p?.shortName ?? f.name,
+			d: (coordinates as Ring[]).map(ringPath).join(" "),
+			visited: p ? !!statsBySlug[p.slug] : false,
+		});
+	} else if (type === "MultiPolygon") {
+		provincePaths.push({
+			slug: p?.slug ?? "",
+			name: p?.shortName ?? f.name,
+			d: (coordinates as Ring[][])
+				.map((poly) => poly.map(ringPath).join(" "))
+				.join(" "),
+			visited: p ? !!statsBySlug[p.slug] : false,
+		});
+	} else if (type === "LineString") {
+		linePaths.push(ringPath(coordinates as Ring));
+	} else if (type === "MultiLineString") {
+		linePaths.push(
+			(coordinates as Ring[]).map(ringPath).join(" "),
+		);
+	}
+}
+---
+
+<MainGridLayout
+	title="诗与远方"
+	description="中国地图上的旅行、徒步、登山与自驾足迹"
+>
+	<section class="page-shell" aria-labelledby="travel-page-title">
+		<div>
+			<header class="page-header card-base">
+				<div class="page-heading">
+					<div class="page-icon" aria-hidden="true">
+						<Icon name="material-symbols:travel-explore-rounded" />
+					</div>
+					<div>
+						<h2 id="travel-page-title">诗与远方</h2>
+						<p>在地图上点亮走过的每一寸土地</p>
+					</div>
+				</div>
+				<div class="page-count" aria-label="足迹统计">
+					<Icon name="material-symbols:location-on-rounded" />
+					<strong>{allStats.places}</strong>
+					<span>个地方 ·</span>
+					<strong>{allStats.total}</strong>
+					<span>次出行 ·</span>
+					<strong>{byProvince.size}</strong>
+					<span>个省份</span>
+				</div>
+			</header>
+
+			<div class="card-base mt-4 p-4 md:p-6">
+				<svg
+					id="china-map"
+					viewBox="0 0 880 530"
+					class="w-full h-auto select-none"
+					role="img"
+					aria-label="中国地图"
+				>
+					{
+						provincePaths.map((p) => (
+							<path
+								d={p.d}
+								class:list={["province", { visited: p.visited }]}
+								data-slug={p.slug}
+								data-name={p.name}
+							/>
+						))
+					}
+					{linePaths.map((d) => <path d={d} class="map-line" />)}
+				</svg>
+
+				<div class="flex items-center gap-4 mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+					<span class="flex items-center gap-1">
+						<span class="inline-block w-3 h-3 rounded-sm legend-visited"></span>
+						已有足迹（点击可进）
+					</span>
+					<span class="flex items-center gap-1">
+						<span class="inline-block w-3 h-3 rounded-sm legend-empty"></span>
+						尚未解锁
+					</span>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<script is:inline define:vars={{ statsBySlug }}>
+		const map = document.getElementById("china-map");
+		if (map) {
+			// 悬停提示框（fixed 定位，与站点其他 tooltip 风格一致）
+			let tip = document.getElementById("travel-tooltip");
+			if (!tip) {
+				tip = document.createElement("div");
+				tip.id = "travel-tooltip";
+				Object.assign(tip.style, {
+					position: "fixed",
+					padding: "6px 10px",
+					borderRadius: "6px",
+					fontSize: "0.75rem",
+					lineHeight: "1.4",
+					background: "rgba(0,0,0,0.8)",
+					color: "#fff",
+					boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+					pointerEvents: "none",
+					opacity: "0",
+					transition: "opacity 0.15s ease",
+					zIndex: "9999",
+					whiteSpace: "nowrap",
+				});
+				document.body.appendChild(tip);
+			}
+
+			map.querySelectorAll(".province").forEach((el) => {
+				const visited = el.classList.contains("visited");
+				const name = el.getAttribute("data-name");
+				const slug = el.getAttribute("data-slug");
+
+				el.addEventListener("mouseenter", () => {
+					if (visited) {
+						const s = statsBySlug[slug];
+						tip.innerHTML =
+							`<div style="font-weight:600;margin-bottom:2px">${name}</div>` +
+							`<div style="opacity:0.85">已游览 ${s.places} 个地方 · 徒步 ${s.hike} 次 · 登山 ${s.climb} 次 · 自驾 ${s.drive} 次</div>`;
+					} else {
+						tip.innerHTML =
+							`<div style="font-weight:600;margin-bottom:2px">${name}</div>` +
+							`<div style="opacity:0.7">还没有足迹</div>`;
+					}
+					tip.style.opacity = "1";
+					const rect = el.getBoundingClientRect();
+					tip.style.left =
+						rect.left + rect.width / 2 - tip.offsetWidth / 2 + "px";
+					tip.style.top = rect.top - tip.offsetHeight - 8 + "px";
+				});
+				el.addEventListener("mouseleave", () => {
+					tip.style.opacity = "0";
+				});
+
+				if (visited) {
+					el.addEventListener("click", () => {
+						const url = `/travel/${slug}/`;
+						if (window.swup) window.swup.visit(url);
+						else window.location.href = url;
+					});
+					el.style.cursor = "pointer";
+				}
+			});
+		}
+	</script>
+
+	<style>
+		.province {
+			fill: var(--btn-plain-bg-hover);
+			stroke: #ffffff;
+			stroke-width: 1;
+			transition: fill 0.2s ease;
+		}
+		.province.visited {
+			fill: color-mix(in srgb, var(--primary) 55%, transparent);
+		}
+		.province.visited:hover {
+			fill: var(--primary);
+		}
+		.map-line {
+			fill: none;
+			stroke: color-mix(in srgb, var(--primary) 40%, transparent);
+			stroke-width: 1;
+			stroke-dasharray: 3 3;
+		}
+		.legend-visited {
+			background: color-mix(in srgb, var(--primary) 55%, transparent);
+		}
+		.legend-empty {
+			background: var(--btn-plain-bg-hover);
+		}
+	</style>
+</MainGridLayout>
