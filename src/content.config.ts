@@ -1,6 +1,8 @@
+import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 import { defineCollection } from "astro:content";
 import type { CollectionConfig } from "astro/content/config";
-import { glob } from "astro/loaders";
+import { glob, type Loader } from "astro/loaders";
 import { type ZodType, z } from "astro/zod";
 
 type PostData = {
@@ -69,8 +71,60 @@ type ContentCollection<T> = CollectionConfig<
 	ReturnType<typeof glob>
 >;
 
-const postsCollection: ContentCollection<PostData> = defineCollection({
-	loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/posts" }),
+// posts 集合加载器：先用 glob 常规加载 src/content/posts 下的文章，
+// 再注入一个由仓库根目录 MAINTENANCE.md 生成的"维护指南"合成条目。
+// 这样 /posts/maintenance/ 在每次构建时都与 MAINTENANCE.md 保持同步，无需手动复制。
+const MAINTENANCE_GUIDE_PATH = fileURLToPath(
+	new URL("../MAINTENANCE.md", import.meta.url),
+);
+
+const postsLoader: Loader = {
+	name: "posts",
+	load: async (context) => {
+		await glob({ pattern: "**/*.{md,mdx}", base: "./src/content/posts" }).load(
+			context,
+		);
+
+		let body: string;
+		try {
+			body = await readFile(MAINTENANCE_GUIDE_PATH, "utf-8");
+		} catch {
+			context.logger.warn("未找到 MAINTENANCE.md，跳过维护指南合成条目");
+			return;
+		}
+
+		const data = await context.parseData({
+			id: "maintenance",
+			data: {
+				title: "个人主页维护指南",
+				published: new Date("2026-10-09"),
+				description: "简单指导你进行项目上线后的使用",
+				tags: ["Github", "开始"],
+				category: "技术",
+				comment: true,
+				pinned: true,
+			},
+		});
+
+		// 与 glob 加载器行为一致：在内容同步阶段渲染 Markdown（含 remark 插件，
+		// 如阅读时长/字数统计），否则页面拿不到渲染产物，正文会渲染为空
+		const rendered = await context.renderMarkdown(body);
+
+		context.store.set({
+			id: "maintenance",
+			data,
+			body,
+			rendered: { html: rendered.html, metadata: rendered.metadata },
+			digest: context.generateDigest(body),
+		});
+	},
+};
+
+const postsCollection: CollectionConfig<
+	ZodType<PostData>,
+	Loader
+> = defineCollection({
+	loader: postsLoader,
 	schema: z.object({
 		title: z.string(),
 		published: z.date(),

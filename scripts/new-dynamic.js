@@ -37,6 +37,18 @@ const hours = dateParts.hour;
 const minutes = dateParts.minute;
 const seconds = dateParts.second;
 const timestamp = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+
+// 计算站点时区相对 UTC 的偏移（如 +08:00）并写入 frontmatter。
+// 无偏移的时间戳会被 YAML 按 UTC 解析，北京时间 16 点之后发布的动态
+// 实际时刻会跨到第二天，导致日历/归档与页面显示差一天。
+const offsetName = new Intl.DateTimeFormat("en-US", {
+	timeZone: timezone,
+	timeZoneName: "longOffset",
+})
+	.formatToParts(now)
+	.find((part) => part.type === "timeZoneName")?.value;
+const offset =
+	offsetName && offsetName !== "GMT" ? offsetName.replace("GMT", "") : "+00:00";
 const fileName = `${year}-${month}-${day}-${hours}${minutes}${seconds}.md`;
 const targetDir = path.resolve("src/content/dynamic");
 const fullPath = path.join(targetDir, fileName);
@@ -48,6 +60,9 @@ if (fs.existsSync(fullPath)) {
 	process.exit(1);
 }
 
-fs.writeFileSync(fullPath, `---\npublished: ${timestamp}\n---\n\n${content}\n`);
+fs.writeFileSync(
+	fullPath,
+	`---\npublished: ${timestamp}${offset}\n---\n\n${content}\n`,
+);
 
 console.log(`Dynamic ${fullPath} created`);
