@@ -139,9 +139,12 @@ const hotspots = provincePaths.filter((p) => p.visited && p.centroid);
 >
 	<section class="page-shell" aria-labelledby="travel-page-title">
 		<div>
-			<header class="page-header card-base travel-header">
-				<div class="page-heading">
-					<div class="page-icon" aria-hidden="true">
+			<header class="travel-hero">
+				<div class="hero-bg-icon" aria-hidden="true">
+					<Icon name="material-symbols:travel-explore-rounded" />
+				</div>
+				<div class="hero-main">
+					<div class="hero-badge" aria-hidden="true">
 						<Icon name="material-symbols:travel-explore-rounded" />
 					</div>
 					<div>
@@ -149,18 +152,33 @@ const hotspots = provincePaths.filter((p) => p.visited && p.centroid);
 						<p>山河远阔，步履不停</p>
 					</div>
 				</div>
-				<div class="travel-overview">
-					<div class="stat-chip">
-						<strong>{byProvince.size}</strong>
-						<span>省份</span>
+				<div class="hero-side">
+					<div class="travel-overview">
+						<div class="stat-chip">
+							<strong>{byProvince.size}</strong>
+							<span>省份</span>
+						</div>
+						<div class="stat-chip">
+							<strong>{allStats.places}</strong>
+							<span>地方</span>
+						</div>
+						<div class="stat-chip">
+							<strong>{allStats.total}</strong>
+							<span>出行</span>
+						</div>
 					</div>
-					<div class="stat-chip">
-						<strong>{allStats.places}</strong>
-						<span>地方</span>
-					</div>
-					<div class="stat-chip">
-						<strong>{allStats.total}</strong>
-						<span>出行</span>
+					<div class="hero-progress">
+						<div class="progress-label">
+							<span>地图点亮</span>
+							<span>{byProvince.size} / 34</span>
+						</div>
+						<div class="progress-track">
+							<div
+								class="progress-fill"
+								style={`width: ${Math.round((byProvince.size / 34) * 100)}%`}
+							>
+							</div>
+						</div>
 					</div>
 				</div>
 			</header>
@@ -300,26 +318,97 @@ const hotspots = provincePaths.filter((p) => p.visited && p.centroid);
 	</script>
 
 	<style>
-		.travel-header {
+		/* ---- 导览头部 Hero ---- */
+		.travel-hero {
+			position: relative;
+			overflow: hidden;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
 			flex-wrap: wrap;
+			gap: 1.25rem;
+			padding: 1.75rem 1.75rem;
+			border-radius: var(--radius-large, 1rem);
+			border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
+			background:
+				linear-gradient(
+					120deg,
+					color-mix(in srgb, var(--primary) 14%, transparent) 0%,
+					color-mix(in srgb, var(--primary) 5%, transparent) 45%,
+					transparent 75%
+				),
+				var(--card-bg, var(--color-background-primary));
+		}
+		.hero-bg-icon {
+			position: absolute;
+			right: -1.5rem;
+			bottom: -2.5rem;
+			font-size: 10rem;
+			line-height: 1;
+			opacity: 0.07;
+			transform: rotate(-12deg);
+			pointer-events: none;
+			color: var(--primary);
+		}
+		.hero-main {
+			display: flex;
+			align-items: center;
 			gap: 1rem;
+		}
+		.hero-badge {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 3.5rem;
+			height: 3.5rem;
+			border-radius: 1rem;
+			font-size: 1.75rem;
+			color: #fff;
+			background: linear-gradient(
+				135deg,
+				var(--primary),
+				color-mix(in srgb, var(--primary) 65%, #3497b2)
+			);
+			box-shadow: 0 6px 16px color-mix(in srgb, var(--primary) 35%, transparent);
+			flex-shrink: 0;
+		}
+		.hero-main h2 {
+			font-size: 1.55rem;
+			font-weight: 700;
+			letter-spacing: 0.02em;
+			color: var(--neutral-900, #171717);
+			line-height: 1.25;
+		}
+		.hero-main p {
+			margin-top: 0.2rem;
+			font-size: 0.85rem;
+			color: color-mix(in srgb, var(--primary) 80%, var(--neutral-500, #737373));
+			letter-spacing: 0.12em;
+		}
+		.hero-side {
+			display: flex;
+			flex-direction: column;
+			gap: 0.75rem;
+			min-width: 15rem;
 		}
 		.travel-overview {
 			display: flex;
 			gap: 0.5rem;
 		}
 		.stat-chip {
+			flex: 1;
 			display: flex;
 			flex-direction: column;
 			align-items: center;
 			justify-content: center;
-			min-width: 4.5rem;
-			padding: 0.5rem 0.9rem;
+			padding: 0.55rem 0.9rem;
 			border-radius: 0.75rem;
-			background: color-mix(in srgb, var(--primary) 8%, transparent);
+			background: color-mix(in srgb, var(--card-bg, #ffffff) 72%, transparent);
+			border: 1px solid color-mix(in srgb, var(--primary) 16%, transparent);
+			backdrop-filter: blur(4px);
 		}
 		.stat-chip strong {
-			font-size: 1.25rem;
+			font-size: 1.3rem;
 			font-weight: 700;
 			color: var(--primary);
 			line-height: 1.2;
@@ -328,6 +417,38 @@ const hotspots = provincePaths.filter((p) => p.visited && p.centroid);
 			font-size: 0.72rem;
 			color: var(--neutral-500, #737373);
 		}
+		.hero-progress {
+			display: flex;
+			flex-direction: column;
+			gap: 0.3rem;
+		}
+		.progress-label {
+			display: flex;
+			justify-content: space-between;
+			font-size: 0.72rem;
+			color: var(--neutral-500, #737373);
+		}
+		.progress-label span:last-child {
+			color: var(--primary);
+			font-weight: 600;
+		}
+		.progress-track {
+			height: 0.35rem;
+			border-radius: 999px;
+			background: color-mix(in srgb, var(--primary) 12%, transparent);
+			overflow: hidden;
+		}
+		.progress-fill {
+			height: 100%;
+			border-radius: 999px;
+			background: linear-gradient(
+				90deg,
+				color-mix(in srgb, var(--primary) 70%, transparent),
+				var(--primary)
+			);
+			transition: width 0.6s ease;
+		}
+		/* ---- 地图 ---- */
 		.province {
 			fill: var(--btn-plain-bg-hover);
 			stroke: #ffffff;
