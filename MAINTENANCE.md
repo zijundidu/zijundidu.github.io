@@ -209,6 +209,7 @@ comment: true              # false 关闭本文评论
 |:---|:---|
 | `src/content/posts/` | 文章，一个 `.md` 一个 URL（URL = 文件名） |
 | `src/content/dynamic/` | 动态/生活碎片，进时间线和首页侧栏 |
+| `src/content/travel/` | 诗与远方的旅行/徒步/登山/自驾记录（见 5.10） |
 | `src/content/projects/` | 项目页精选卡片（GitHub 仓库区块自动拉取，不用管） |
 | `src/content/spec/` | `friends.mdx` 友链页底部文字、`about.md` 关于页、`guestbook.md` 留言板 |
 
@@ -228,3 +229,49 @@ comment: true              # false 关闭本文评论
 **首页横幅标题下方的链接图标**（GitHub / Email / Sponsor / RSS）：`src/config/backgroundWallpaper.ts` 的 `homeText.links`。当前 Sponsor 跳转到 `/about/`，放了收款码后可改为 `/sponsor/`。
 
 **已清理的死资源（2026-10-09，git 历史可找回）**：看板娘模型 `public/pio/`（15MB，看板娘开关已关）、主题作者的收款码/广告图/示例字体、无引用的示例图（`test.jpg`、`posts/images/`、`projects/images/`）、无引用的 js/css（marked/highlight/twikoo）、`anime-list.json`。若以后要开看板娘或打赏页，需重新准备对应文件。
+
+### 5.10 诗与远方（旅行足迹）
+
+入口：导航"我的 → 诗与远方"。数据文件在 `src/content/travel/`，**一个 `.md` 文件 = 一条记录**，文件名就是记录 id（也是详情页 URL 的一部分，建议 `省名-地点-类型.md` 风格，如 `sichuan-daocheng-hiking.md`）。
+
+**frontmatter 字段**（复制改即可）：
+
+```yaml
+---
+title: 稻城亚丁徒步          # 记录标题
+province: 四川               # 省常用名，必须能在 src/utils/travel-utils.ts 的 PROVINCES 表里匹配到（34 个省级行政区）
+type: 徒步                   # 四选一：旅行 | 徒步 | 登山 | 自驾（决定徽标颜色和统计口径）
+date: 2024-06-15             # 出行日期，写到"日"即可
+location: 稻城亚丁            # 地点名；同一个省 location 不同的记录会去重计数"游览了多少个地方"
+description: 短线看珍珠海，长线冲牛奶海……   # 列表页摘要，一两句话
+image: ""                    # 可选，封面图路径
+---
+```
+
+正文用普通 Markdown 自由写（行程、路线、装备、照片 `![说明](/images/xxx.jpg)` 等），发布后就是详情页内容。
+
+**发布后自动生效**（push 即可，无需改任何配置）：
+- 地图点亮该省份，悬停显示该省统计（已游览 X 个地方 · 徒步 X 次 · 登山 X 次 · 自驾 X 次），点击进入省份列表页
+- 看板"最后活动"和首页侧边栏日历会计入（在日历里按文章类别展示）
+- 省份页导览头、统计芯片自动更新
+
+### 5.11 文章页的「相关文章 / 随机文章」推荐原理
+
+两个推荐位都在文章页底部，**互不相同、互不妨碍**：
+
+**相关文章（构建时计算，静态，全站一致）**——源码 `src/utils/content-utils.ts` 的 `getRelatedPosts()`：
+1. 候选池：除本文外的全部非加密文章
+2. 每篇打分四项相加：
+   - 标签相似度（0–100）：本文标签集与候选标签集的 Jaccard 相似度 ×100，**权重最大**
+   - 标题相似度（0–100）：标题中文分词（Intl.Segmenter）后的 Jaccard 相似度 ×100
+   - 新鲜度（0–30）：`30 × 2^(-发布天数/180)`，6 个月半衰期，越新越高
+   - 分类加成（+10）：与本文同分类
+3. 先按总分排序，**优先取有标签重叠的**；不足 5 篇时，用"新鲜度 + 分类加成"从剩余文章里补齐
+4. 想让某篇文章更容易被推荐到：给它加**相同标签**最管用，其次同分类、标题含相关词
+
+**随机文章（浏览器端实时随机）**——源码 `src/components/misc/RecommendedPost.astro`：
+1. 页面加载后前端 fetch `/api/allPostMeta.json`（全站文章元数据索引，一次会话只请求一次并缓存）
+2. 排除本文、已推荐的"相关文章"、加密文章
+3. Fisher-Yates 洗牌后取前 5 篇——**纯随机**，与标签/时间无关，每次刷新结果都不同
+
+**开关**：`src/config/siteConfig.ts` 的 `post.relatedPosts` 和 `post.randomPosts`，都设 `false` 则整个区块消失。

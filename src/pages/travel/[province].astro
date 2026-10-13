@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import "@/styles/pages/travel-hero.css";
 import { Icon } from "astro-icon/components";
 import {
 	TRAVEL_TYPE_STYLE,
@@ -38,27 +39,46 @@ function fmt(d: Date): string {
 >
 	<section class="page-shell" aria-labelledby="province-page-title">
 		<div>
-			<header class="page-header card-base">
-				<div class="page-heading">
-					<div class="page-icon" aria-hidden="true">
+			<header class="travel-hero">
+				<div class="hero-bg-icon" aria-hidden="true">
+					<Icon name="material-symbols:travel-rounded" />
+				</div>
+				<div class="hero-main">
+					<div class="hero-badge" aria-hidden="true">
 						<Icon name="material-symbols:travel-rounded" />
 					</div>
 					<div>
 						<h2 id="province-page-title">{info?.shortName ?? province}</h2>
-						<p>
-							已游览 {stats.places} 个地方 · 徒步 {stats.hike} 次 · 登山 {
-								stats.climb
-							} 次 · 自驾 {stats.drive} 次
-						</p>
+						<p>旅行 · 徒步 · 登山 · 自驾足迹</p>
 					</div>
 				</div>
-				<a
-					href="/travel/"
-					class="btn-plain rounded-lg px-3 py-2 text-sm flex items-center gap-1"
-				>
-					<Icon name="fa7-solid:arrow-left" class="text-xs" />
-					返回地图
-				</a>
+				<div class="hero-side">
+					<div class="travel-overview">
+						<div class="stat-chip">
+							<strong>{stats.places}</strong>
+							<span>地方</span>
+						</div>
+						<div class="stat-chip">
+							<strong>{stats.hike}</strong>
+							<span>徒步</span>
+						</div>
+						<div class="stat-chip">
+							<strong>{stats.climb}</strong>
+							<span>登山</span>
+						</div>
+						<div class="stat-chip">
+							<strong>{stats.drive}</strong>
+							<span>自驾</span>
+						</div>
+					</div>
+					<a
+						href="/travel/"
+						class="btn-plain rounded-lg px-3 py-2 text-sm flex items-center justify-center gap-1"
+					>
+						<Icon name="fa7-solid:arrow-left" class="text-xs" />
+						返回地图
+					</a>
+				</div>
 			</header>
 
 			<div class="flex flex-col gap-3 mt-4">
