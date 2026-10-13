@@ -374,7 +374,7 @@ const dynamicLabel = i18n(I18nKey.dynamic);
       }
       
       if (isToday) {
-        classes.push("ring-2 ring-(--primary)");
+        classes.push("calendar-today");
       }
       
       return `
@@ -649,7 +649,14 @@ const dynamicLabel = i18n(I18nKey.dynamic);
     transform: translateY(-2px);
   }
 
-  /* 自定义选中日期样式：底色 + 主题色描边（描边与热力图 hover 光环一致，选中态一眼可辨） */
+  /* 今天的标记：浅色细环，与选中态的实心描边区分开，避免两个 ring 并存时混淆 */
+  :global(.calendar-today) {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 50%, transparent);
+    border-radius: 0.25rem;
+  }
+
+  /* 自定义选中日期样式：底色 + 主题色描边（描边与热力图 hover 光环一致，选中态一眼可辨）。
+     规则位于 .calendar-today 之后，今天被选中时以选中态为准 */
   :global(.calendar-day-selected) {
     background-color: var(--btn-regular-bg);
     border-radius: 0.25rem;
