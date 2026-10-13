@@ -235,6 +235,8 @@ comment: true              # false 关闭本文评论
 
 **首页横幅标题下方的链接图标**（GitHub / Email / Sponsor / RSS）：`src/config/backgroundWallpaper.ts` 的 `homeText.links`。当前 Sponsor 跳转到 `/about/`，放了收款码后可改为 `/sponsor/`。
 
+**第三轮精简（2026-10-13）**：i18n 裁为中文单语（删 en/ja/ko/ru/zh_TW，所有语言代码回落 zh_CN）、孤儿文件（build-platform/failed-covers/language-utils 工具、FilterControls/TabNav 组件、photoswipe.css、两个未接线脚本、空 icons 目录）、过期主题文档（src/config/README.md、src/components/README.md）。
+
 **已整页删除的功能（2026-10-13 第二轮）**：背景视频（含本地视频文件与 BackgroundPlayer）、樱花特效（含显示设置面板的特效标签页）、SiteInfo"站点信息"组件、reading-time/ci-info 无用依赖。导航栏播放按钮改为"切换背景图"。
 
 **已整页删除的功能（2026-10-13）**：哔哩哔哩追番、番组计划 Bangumi、VNDB、MyAnimeList、书签导航 booknav、看板娘 Live2D/Spine（pio）、GreatVibes 示例字体——页面/组件/配置/类型/工具脚本已全部清理，只残留无害的 i18n 翻译词条。

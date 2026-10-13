@@ -13,19 +13,26 @@ Kraken 的个人主页，基于 **Astro 7 + Firefly 主题**（[CuteLeaf/Firefly
 
 | 集合 | 用途 | frontmatter |
 |:---|:---|:---|
-| `posts/` | 长文章 | `title`、`published`（必填），`description`/`tags`/`category`/`image`/`draft`/`updated`/`pinned`/`series` 可选 |
-| `dynamic/` | 动态/生活碎片（时间线） | `published`（必填），`location`/`pinned` 可选，文件名建议 `YYYY-MM-DD-HHMMSS.md` |
+| `posts/` | 长文章（维护指南文章由 postsLoader 构建时从根目录 MAINTENANCE.md 合成，目录可为空） | `title`、`published`（必填），`description`/`tags`/`category`/`image`/`draft`/`updated`/`pinned`/`series` 可选 |
+| `dynamic/` | 动态/生活碎片（时间线） | `published`（必填，**必须带时区偏移**如 `+08:00`），`location`/`pinned` 可选，文件名建议 `YYYY-MM-DD-HHMMSS.md` |
+| `travel/` | 诗与远方旅行记录 | `title`、`province`（省常用名）、`type`（旅行/徒步/登山/自驾）、`date`、`location`/`description`/`image` 可选 |
 | `projects/` | 项目卡片 | `title`、`published`（必填），`description`/`tags`/`link[]`/`status` 可选 |
 | `spec/` | 关于/友链/留言板文案 | about.md / friends.mdx / guestbook.md |
 
-新增文章：`pnpm new-post`（脚手架）。发布后推 main 即自动部署。
+新增文章：`pnpm new-post`；发动态：`pnpm new-dynamic <内容>`。发布后推 main 即自动部署。
 
 ## 定制功能（改动主题时留意）
 
-- **访问量/访客数**：不蒜子（busuanzi）纯前端统计。脚本在 `src/components/analytics/BusuanziAnalytics.astro`（全站注入），数字填充到 `#busuanzi_value_site_pv` / `#busuanzi_value_site_uv`；展示行在 `src/components/widget/SiteStats.astro`
-- **累计评论数**：构建时经 `src/utils/comment-stats.ts` 匿名调用 GitHub Discussions API（60 次/时限额，进程内缓存，失败降级为 0），仅在 SiteStats 使用
-- **站点时间线**：`src/components/widget/SiteTimeline.astro`，合并 posts + dynamic 按时间倒序，构建时静态生成；已挂载到 `src/pages/about.astro`
+- **访问量/访客数**：Vercount 纯前端统计（组件沿用旧名 `src/components/analytics/BusuanziAnalytics.astro`，锚点兼容不蒜子）。数字填充到 `#busuanzi_value_site_pv` / `#busuanzi_value_uv`；展示行在 `src/components/widget/SiteStats.astro`
+- **累计评论数**：双层口径——构建时 `src/utils/comment-stats.ts` 拉 GitHub Discussions 作后备；页面加载后浏览器实时重算（只统计 giscus 机器人创建且路径仍存在于站内的 discussion），删除文章后自动剔除孤儿
+- **站点时间线**：`src/components/widget/SiteTimeline.astro`，合并 posts + dynamic + travel 按时间倒序，构建时静态生成；已挂载到 `src/pages/about.astro`
 - **评论**：Giscus，配置在 `src/config/commentConfig.ts`（repo `zijundidu/zijundidu.github.io`，`mapping: "pathname"`，与历史 discussion 标题一致，勿改）
+- **时间口径**：全站北京时间。`siteConfig.timezone`（Asia/Shanghai）控制显示；动态 frontmatter 时间必须带 `+08:00`，无偏移会被 YAML 按 UTC 解析
+- **导航栏切图按钮**：`#bg-wallpaper-next` 派发 `bannerCarouselNext` 事件，壁纸轮播脚本（WallpaperSection）监听并切下一张；背景视频功能已移除
+
+## 已删除的功能（2026-10-13 多轮清理，git 历史可找回）
+
+哔哩哔哩/Bangumi/VNDB/MyAnimeList/书签导航整页、看板娘 Live2D/Spine、樱花特效、背景视频、SiteInfo 组件、GreatVibes 示例字体、i18n 多语言（现中文单语）。完整清单见 MAINTENANCE.md 5.9。
 
 ## 主要配置入口（src/config/）
 
