@@ -68,5 +68,4 @@ export const displaySettingsConfig: DisplaySettingsConfig =
 		// ── 特效 (Effects) ────────────────────────────────────
 
 		// 樱花特效开关
-		sakuraSwitchable: true,
 	});

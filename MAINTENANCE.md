@@ -47,7 +47,7 @@ mobile: "https://t.alcy.cc/mp",
 
 注意：远程 URL 和 public 目录的图片不会做压缩优化，务必控制体积。
 
-**背景视频**（可选）：`playerEnable: true` 时导航栏出现视频按钮，`src.video` 填视频地址（mp4/webm），不填则只有按钮无视频。
+**导航栏"切图"按钮**：配置了多张壁纸时，导航栏会出现一个 ⏭ 按钮，点击按顺序切换到下一张背景图（桌面/移动端各用各的图池）。背景视频功能已移除（2026-10-13），按钮从"播放视频"改成了"切换壁纸"。
 
 ## 2. 修改主页背景音乐
 
@@ -234,6 +234,8 @@ comment: true              # false 关闭本文评论
 | 头像 | 无本地文件，用 GitHub 远程头像 `https://github.com/zijundidu.png` | `profileConfig.ts` |
 
 **首页横幅标题下方的链接图标**（GitHub / Email / Sponsor / RSS）：`src/config/backgroundWallpaper.ts` 的 `homeText.links`。当前 Sponsor 跳转到 `/about/`，放了收款码后可改为 `/sponsor/`。
+
+**已整页删除的功能（2026-10-13 第二轮）**：背景视频（含本地视频文件与 BackgroundPlayer）、樱花特效（含显示设置面板的特效标签页）、SiteInfo"站点信息"组件、reading-time/ci-info 无用依赖。导航栏播放按钮改为"切换背景图"。
 
 **已整页删除的功能（2026-10-13）**：哔哩哔哩追番、番组计划 Bangumi、VNDB、MyAnimeList、书签导航 booknav、看板娘 Live2D/Spine（pio）、GreatVibes 示例字体——页面/组件/配置/类型/工具脚本已全部清理，只残留无害的 i18n 翻译词条。
 

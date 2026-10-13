@@ -89,6 +89,13 @@ import { url } from "@/utils/url-utils";
     const el = document.getElementById("redirect-countdown");
     let seconds = 5;
     window.__redirectTimer = setInterval(() => {
+        // Swup 切页后 404 的 DOM 已销毁，此时必须自清计时器，
+        // 否则会在新页面上强制执行跳转
+        if (!document.getElementById("redirect-countdown")) {
+            clearInterval(window.__redirectTimer);
+            window.__redirectTimer = undefined;
+            return;
+        }
         seconds -= 1;
         if (seconds <= 0) {
             clearInterval(window.__redirectTimer);

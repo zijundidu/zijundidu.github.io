@@ -29,7 +29,8 @@ const list = all
 const stats = calcStats(list);
 
 function fmt(d: Date): string {
-	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+	// frontmatter 的 date 为纯日期，被 YAML 按 UTC 零点解析，用 UTC 读数保证不随服务器时区偏移
+	return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
 }
 ---
 

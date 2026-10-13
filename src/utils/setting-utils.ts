@@ -17,7 +17,6 @@ import {
 	backgroundWallpaper,
 	displaySettingsConfig,
 	expressiveCodeConfig,
-	sakuraConfig,
 	siteConfig,
 } from "../config";
 import { isHomePage as checkIsHomePage } from "./layout-utils";
@@ -760,36 +759,6 @@ export function applyGradientEnabledToDocument(enabled: boolean): void {
 	}
 }
 
-// Sakura effect functions
-export function getDefaultSakuraEnabled(): boolean {
-	return sakuraConfig?.enable ?? false;
-}
-
-export function getStoredSakuraEnabled(): boolean {
-	if (typeof localStorage === "undefined") {
-		return getDefaultSakuraEnabled();
-	}
-	const stored = localStorage.getItem("sakuraEnabled");
-	if (stored === null) {
-		return getDefaultSakuraEnabled();
-	}
-	return stored === "true";
-}
-
-export function setSakuraEnabled(enabled: boolean): void {
-	if (
-		typeof localStorage === "undefined" ||
-		typeof localStorage.setItem !== "function"
-	) {
-		return;
-	}
-	localStorage.setItem("sakuraEnabled", String(enabled));
-	document.documentElement.setAttribute("data-sakura-enabled", String(enabled));
-	// 实时切换樱花特效
-	window.dispatchEvent(
-		new CustomEvent("sakuraToggle", { detail: { enabled } }),
-	);
-}
 
 // Banner title functions
 export function getDefaultBannerTitleEnabled(): boolean {

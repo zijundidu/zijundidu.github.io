@@ -18,7 +18,6 @@ import {
 	getDefaultOverlayBlur,
 	getDefaultOverlayCardOpacity,
 	getDefaultOverlayOpacity,
-	getDefaultSakuraEnabled,
 	getDefaultWavesEnabled,
 	getHue,
 	getStoredBannerCarouselEnabled,
@@ -30,7 +29,6 @@ import {
 	getStoredOverlayBlur,
 	getStoredOverlayCardOpacity,
 	getStoredOverlayOpacity,
-	getStoredSakuraEnabled,
 	getStoredWallpaperMode,
 	getStoredWavesEnabled,
 	setBannerCarouselEnabled,
@@ -43,7 +41,6 @@ import {
 	setOverlayBlur,
 	setOverlayCardOpacity,
 	setOverlayOpacity,
-	setSakuraEnabled,
 	setWallpaperMode,
 	setWavesEnabled,
 } from "@utils/setting-utils";
@@ -69,7 +66,7 @@ type OverlaySliderItem = {
 	onValueChange: (value: number) => void;
 };
 
-type TabKey = "appearance" | "wallpaper" | "effects";
+type TabKey = "appearance" | "wallpaper";
 
 let hue = $state(getHue());
 const defaultHue = getDefaultHue();
@@ -102,8 +99,6 @@ let bannerTitleEnabled = $state(true);
 const defaultBannerTitleEnabled = getDefaultBannerTitleEnabled();
 let bannerCarouselEnabled = $state(true);
 const defaultBannerCarouselEnabled = getDefaultBannerCarouselEnabled();
-let sakuraEnabled = $state(true);
-const defaultSakuraEnabled = getDefaultSakuraEnabled();
 let overlayOpacity = $state(getDefaultOverlayOpacity());
 const defaultOverlayOpacity = getDefaultOverlayOpacity();
 let overlayBlur = $state(getDefaultOverlayBlur());
@@ -134,7 +129,6 @@ const isBannerTitleSwitchable =
 	isBannerTitleEnabled && displaySettingsConfig.bannerTitleSwitchable;
 const isBannerCarouselSwitchable =
 	displaySettingsConfig.bannerCarouselSwitchable;
-const isSakuraSwitchable = displaySettingsConfig.sakuraSwitchable;
 const isCardBorderSwitchable = displaySettingsConfig.cardBorderSwitchable;
 const isCardFollowThemeSwitchable =
 	displaySettingsConfig.cardFollowThemeSwitchable;
@@ -198,8 +192,7 @@ const hasAnyContent = $derived(
 		isFullscreenLayoutSwitchable ||
 		allowLayoutSwitch ||
 		hasBannerSettings ||
-		hasOverlaySettings ||
-		isSakuraSwitchable,
+		hasOverlaySettings,
 );
 
 // --- Tab visibility ---
@@ -219,8 +212,6 @@ const hasWallpaperTab = $derived(
 			wallpaperMode === WALLPAPER_FULLSCREEN) &&
 			hasBannerSettings),
 );
-const hasEffectsTab = $derived(isSakuraSwitchable);
-
 let visibleTabs = $derived.by(() => {
 	const tabs: { key: TabKey; icon: string; label: string }[] = [];
 	if (hasAppearanceTab)
@@ -234,12 +225,6 @@ let visibleTabs = $derived.by(() => {
 			key: "wallpaper",
 			icon: "material-symbols:wallpaper",
 			label: i18n(I18nKey.settingsTabWallpaper),
-		});
-	if (hasEffectsTab)
-		tabs.push({
-			key: "effects",
-			icon: "mdi:flower-poppy",
-			label: i18n(I18nKey.settingsTabEffects),
 		});
 	return tabs;
 });
@@ -426,11 +411,6 @@ function toggleBannerCarouselEnabled() {
 	setBannerCarouselEnabled(bannerCarouselEnabled);
 }
 
-function toggleSakuraEnabled() {
-	sakuraEnabled = !sakuraEnabled;
-	setSakuraEnabled(sakuraEnabled);
-}
-
 function toggleCardBorderEnabled() {
 	cardBorderEnabled = !cardBorderEnabled;
 	setCardBorderEnabled(cardBorderEnabled);
@@ -546,9 +526,6 @@ onMount(() => {
 
 	// 从localStorage读取横幅轮播状态
 	bannerCarouselEnabled = getStoredBannerCarouselEnabled();
-
-	// 从localStorage读取樱花特效状态
-	sakuraEnabled = getStoredSakuraEnabled();
 
 	// 从localStorage读取卡片样式状态
 	cardBorderEnabled = getStoredCardBorderEnabled();
@@ -1027,38 +1004,5 @@ $effect(() => {
 		{/if}
 	{/if}
 
-	<!-- Effects Tab: Sakura -->
-	{#if activeTab === "effects"}
-		{#if isSakuraSwitchable}
-		<div class="">
-			<div class="section-title">
-				{i18n(I18nKey.effectsSettings)}
-				<button aria-label="Reset to Default" class="btn-regular rounded-md active:scale-90"
-						class:opacity-0={sakuraEnabled === defaultSakuraEnabled} class:pointer-events-none={sakuraEnabled === defaultSakuraEnabled}
-						disabled={sakuraEnabled === defaultSakuraEnabled} aria-hidden={sakuraEnabled === defaultSakuraEnabled ? "true" : undefined}
-						onclick={() => { sakuraEnabled = defaultSakuraEnabled; setSakuraEnabled(defaultSakuraEnabled); }}>
-					<div class="text-(--btn-content)">
-						<Icon icon="fa7-solid:arrow-rotate-left" class="text-[0.75rem]"></Icon>
-					</div>
-				</button>
-			</div>
-			<button
-				class="w-full btn-regular rounded-md py-2 px-3 flex items-center gap-3 text-left active:scale-95 transition-all relative overflow-hidden"
-				class:bg-(--btn-regular-bg-hover)={sakuraEnabled}
-				onclick={toggleSakuraEnabled}
-			>
-				<Icon icon="mdi:flower-poppy" class="text-[1.25rem] shrink-0"></Icon>
-				<span class="text-sm flex-1">{i18n(I18nKey.sakuraEffect)}</span>
-				<div class="w-10 h-5 rounded-full transition-all duration-200 relative"
-					 class:bg-(--primary)={sakuraEnabled}
-					 class:bg-(--btn-regular-bg-active)={!sakuraEnabled}>
-					<div class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200"
-						 class:left-0.5={!sakuraEnabled}
-						 class:left-5={sakuraEnabled}></div>
-				</div>
-			</button>
-		</div>
-		{/if}
-	{/if}
-</div>
+	</div>
 {/if}

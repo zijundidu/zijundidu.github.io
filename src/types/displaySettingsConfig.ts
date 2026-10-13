@@ -56,5 +56,4 @@ export type DisplaySettingsConfig = {
 	// ── 特效 (Effects) ────────────────────────────────────
 
 	// 樱花特效开关
-	sakuraSwitchable: boolean;
 };
