@@ -116,6 +116,7 @@ const dynamicLabel = i18n(I18nKey.dynamic);
     <!-- 文章列表 -->
     <div id="calendar-posts" class="mt-3">
       <div class="border-t border-neutral-200 dark:border-neutral-700 mb-2" id="calendar-posts-divider" style="display: none;"></div>
+      <div class="text-xs text-neutral-500 dark:text-neutral-400 mb-1.5 px-1" id="calendar-posts-header" style="display: none;"></div>
       <div class="flex flex-col gap-1 max-h-48 overflow-y-auto custom-scrollbar" id="calendar-posts-list">
         <!-- 将由 JavaScript 填充 -->
       </div>
@@ -476,7 +477,13 @@ const dynamicLabel = i18n(I18nKey.dynamic);
     if (postsWrapper) {
       postsWrapper.style.display = currentMonthPosts.length > 0 ? 'block' : 'none';
     }
-    
+
+    const postsHeader = document.getElementById('calendar-posts-header');
+    if (postsHeader) {
+      postsHeader.textContent = `本月 · ${currentMonthPosts.length} 篇`;
+      postsHeader.style.display = currentMonthPosts.length > 0 ? 'block' : 'none';
+    }
+
     if (postsList) {
       postsList.innerHTML = currentMonthPosts.map(post => {
         const date = new Date(post.published);
@@ -535,6 +542,14 @@ const dynamicLabel = i18n(I18nKey.dynamic);
         if (posts.length > 0 && postsList) {
           if (postsWrapper) {
             postsWrapper.style.display = 'block';
+          }
+
+          // 标题标明当前查看的是哪一天
+          const header = document.getElementById('calendar-posts-header');
+          if (header) {
+            const [, m, d] = dateKey.split('-');
+            header.textContent = `${parseInt(m, 10)}月${parseInt(d, 10)}日 · ${posts.length} 篇`;
+            header.style.display = 'block';
           }
 
           // 渲染文章列表
@@ -634,10 +649,11 @@ const dynamicLabel = i18n(I18nKey.dynamic);
     transform: translateY(-2px);
   }
 
-  /* 自定义选中日期样式 */
+  /* 自定义选中日期样式：底色 + 主题色描边（描边与热力图 hover 光环一致，选中态一眼可辨） */
   :global(.calendar-day-selected) {
     background-color: var(--btn-regular-bg);
     border-radius: 0.25rem;
+    box-shadow: 0 0 0 1.5px var(--primary, oklch(0.55 0.15 250));
   }
 
   /* 热力图单元格 */
