@@ -179,6 +179,13 @@ comment: true              # false 关闭本文评论
 - 数字由浏览器端 JS 异步填充，已配置 preconnect 预热，通常 1 秒内显示，慢网络 1-2 秒属正常；计数从接入日开始，无历史数据
 - 展示位置：首页"站点统计"组件，桌面右侧栏与移动端底部都显示（移动端数值由页面脚本从统计锚点复制，站内有刷新跳转后显示缓存值，完整加载后刷新为最新）
 
+### 5.6b 评论统计（累计评论）
+- 评论全部存放在 **GitHub Discussions**（Giscus 的机制，每篇可评论页面对应一个 discussion，标题即页面路径，如 `posts/maintenance/`、`guestbook/`）
+- 看板"累计评论"**实时计算**：页面加载后浏览器直接调 GitHub API（匿名，每个访客 60 次/小时），只统计 **giscus 机器人创建、且路径仍存在于站内** 的 discussion 的评论数，然后覆盖构建时的后备值
+- **删除文章后计数自动同步**：文章的 discussion 会变为"孤儿"，构建时与前端统计都会按现存页面列表（`/api/allPostMeta.json` + 固定页面 `dynamic/` `guestbook/` `friends/` `sponsor/`）过滤掉，下次 push 后即不再计入
+- **GitHub 上的 discussion 是否删除？——不删，评估结论**：discussion 是访客的留言存档，删除不可逆；而且如果哪天同名路径重建（同标题/同路径文章），Giscus 会把新评论挂回原来的 discussion，评论历史自动"复活"。想彻底清理只能到 GitHub 仓库的 Discussions 页手动删。站内计数与 discussion 数据因此允许不一致：计数 = 现存页面的评论，discussion = 全量历史
+- 访客评论后**无需 push** 即可在看板看到最新数（下次加载页面时）；限流或网络失败时回退为构建时的后备值
+
 ### 5.7 站点外观微调
 - 主题色：`siteConfig.ts` 的 `themeColor.hue`（0-360，当前 222 青蓝；主色锚点已按定制色卡写死在 `src/styles/variables.styl`，改 hue 只影响背景/标签等派生色）
 - 深浅色默认：`themeColor.defaultMode`（"light"/"dark"/"system"）

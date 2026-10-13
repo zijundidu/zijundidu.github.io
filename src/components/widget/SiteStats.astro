@@ -6,7 +6,7 @@ import { siteConfig } from "@/config";
 import I18nKey from "@/i18n/i18nKey";
 import { i18n } from "@/i18n/translation";
 import type { WidgetComponentConfig } from "@/types/config";
-import { getTotalComments } from "@/utils/comment-stats";
+import { getTotalComments, COMMENT_COUNTER_SNIPPET_INFO } from "@/utils/comment-stats";
 import {
 	getCategoryList,
 	getSortedPosts,
@@ -255,7 +255,7 @@ const statSuffixClass = "ml-1 text-sm text-neutral-500 dark:text-neutral-400";
         <span>累计评论</span>
       </div>
       <div class="flex items-center">
-        <span class={statValueClass}>{formatNumber(totalComments)}</span>
+        <span class={statValueClass}><span id="js-total-comments">{formatNumber(totalComments)}</span></span>
         <span class={statSuffixClass}>条</span>
       </div>
     </div>
@@ -353,4 +353,48 @@ const statSuffixClass = "ml-1 text-sm text-neutral-500 dark:text-neutral-400";
       }, 100);
     });
   }
+</script>
+
+{/* 累计评论：浏览器端实时统计（GitHub Discussions API，匿名 60 次/小时/IP）。
+    只计入 giscus 机器人创建且路径仍存在于站内的 discussion，删除文章后自动排除。
+    构建时渲染的后备值在上面，此处拉取成功后覆盖。 */}
+<script is:inline define:vars={{ commentRepo: COMMENT_COUNTER_SNIPPET_INFO.repo, commentStaticPaths: COMMENT_COUNTER_SNIPPET_INFO.staticPaths }}>
+(function refreshTotalComments() {
+  function apply(v) {
+    document.querySelectorAll('#js-total-comments').forEach(function (el) {
+      el.textContent = v;
+    });
+  }
+  if (window.__totalComments != null) {
+    apply(String(window.__totalComments));
+    return;
+  }
+  Promise.all([
+    fetch('/api/allPostMeta.json').then(function (r) { return r.json(); }),
+    fetch('https://api.github.com/repos/' + commentRepo + '/discussions?per_page=100').then(function (r) {
+      return r.ok ? r.json() : null;
+    }),
+  ]).then(function (results) {
+    var meta = results[0];
+    var discussions = results[1];
+    if (!Array.isArray(discussions)) return;
+    var postIds = {};
+    (meta || []).forEach(function (e) {
+      if (e.type === 'post') postIds[e.id] = true;
+    });
+    var total = 0;
+    discussions.forEach(function (d) {
+      if (!d.user || d.user.login !== 'giscus[bot]') return;
+      var t = d.title || '';
+      var isLivePost = t.indexOf('posts/') === 0 && postIds[t.slice(6, -1)] === true;
+      if (isLivePost || commentStaticPaths.indexOf(t) !== -1) {
+        total += d.comments || 0;
+      }
+    });
+    window.__totalComments = total;
+    apply(String(total));
+  }).catch(function () {
+    /* 拉取失败时保留构建时的后备值 */
+  });
+})();
 </script>
