@@ -7,6 +7,8 @@ import { url } from "@/utils/url-utils";
 ---
 
 <MainGridLayout title={i18n(I18nKey.notFound)} description={i18n(I18nKey.notFoundDescription)}>
+    <!-- 5 秒后自动跳转首页（meta refresh：JS 被禁用时也能跳转） -->
+    <meta http-equiv="refresh" content="5;url=/" slot="head" />
     <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-96">
         <div class="card-base z-10 px-9 py-12 relative w-full flex flex-col items-center justify-center text-center">
             <!-- 404 大号数字 -->
@@ -25,8 +27,13 @@ import { url } from "@/utils/url-utils";
             </div>
             
             <!-- 描述 -->
-            <p class="text-lg text-75 mb-8 max-w-md">
+            <p class="text-lg text-75 mb-2 max-w-md">
                 {i18n(I18nKey.notFoundDescription)}
+            </p>
+
+            <!-- 自动跳转倒计时 -->
+            <p class="text-sm text-60 mb-8">
+                <span id="redirect-countdown">5</span> 秒后自动返回首页…
             </p>
             
             <!-- 返回首页按钮 -->
@@ -54,7 +61,7 @@ import { url } from "@/utils/url-utils";
     .card-base {
         animation: fadeInUp 0.6s ease-out;
     }
-    
+
     @keyframes fadeInUp {
         from {
             opacity: 0;
@@ -65,10 +72,31 @@ import { url } from "@/utils/url-utils";
             transform: translateY(0);
         }
     }
-    
+
     /* 按钮悬停效果 */
     a:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
     }
 </style>
+
+<script>
+    // 404 自动跳转首页倒计时；Swup 切页会重跑内联脚本，先清掉上一个计时器
+    if (window.__redirectTimer) {
+        clearInterval(window.__redirectTimer);
+        window.__redirectTimer = undefined;
+    }
+    const el = document.getElementById("redirect-countdown");
+    let seconds = 5;
+    window.__redirectTimer = setInterval(() => {
+        seconds -= 1;
+        if (seconds <= 0) {
+            clearInterval(window.__redirectTimer);
+            window.__redirectTimer = undefined;
+            // meta refresh 是兜底；JS 可用时用 replace 跳转（不留历史记录）
+            window.location.replace("/");
+        } else if (el) {
+            el.textContent = String(seconds);
+        }
+    }, 1000);
+</script>
