@@ -1,31 +1,27 @@
 import { siteConfig } from "../config";
 import type I18nKey from "./i18nKey";
-import { en } from "./languages/en";
-import { ja } from "./languages/ja";
-import { ko } from "./languages/ko";
-import { ru } from "./languages/ru";
 import { zh_CN } from "./languages/zh_CN";
-import { zh_TW } from "./languages/zh_TW";
 
 export type Translation = {
 	[K in I18nKey]: string;
 };
 
-const defaultTranslation = en;
+// 站点为中文单语，所有语言代码统一回落到简体中文
+const defaultTranslation = zh_CN;
 
 const map: { [key: string]: Translation } = {
-	en: en,
-	en_us: en,
-	en_gb: en,
-	en_au: en,
 	zh_cn: zh_CN,
-	zh_tw: zh_TW,
-	ja: ja,
-	ja_jp: ja,
-	ru: ru,
-	ru_ru: ru,
-	ko: ko,
-	ko_kr: ko,
+	zh_tw: zh_CN,
+	en: zh_CN,
+	en_us: zh_CN,
+	en_gb: zh_CN,
+	en_au: zh_CN,
+	ja: zh_CN,
+	ja_jp: zh_CN,
+	ru: zh_CN,
+	ru_ru: zh_CN,
+	ko: zh_CN,
+	ko_kr: zh_CN,
 };
 
 export function getTranslation(lang: string): Translation {
@@ -33,17 +29,9 @@ export function getTranslation(lang: string): Translation {
 }
 
 export function i18n(key: I18nKey): string {
-	const lang = siteConfig.lang || "en";
+	const lang = siteConfig.lang || "zh_cn";
 	const currentLang = getTranslation(lang);
 	const value = currentLang[key];
-
-	// 如果当前语言没有翻译（或为空），则使用中文作为备选
-	if (!value && lang.toLowerCase() !== "zh_cn") {
-		const chineseValue = zh_CN[key];
-		if (chineseValue) {
-			return chineseValue;
-		}
-	}
 
 	return value || defaultTranslation[key];
 }
