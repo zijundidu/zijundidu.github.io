@@ -45,6 +45,6 @@ Kraken 的个人主页，基于 **Astro 7 + Firefly 主题**（[CuteLeaf/Firefly
 ## 注意事项
 
 - `src/constants/`（lqips.json、github-card-data.json 等）是预生成产物，内容里没有 `::github{repo=...}` 指令时无需重新生成
-- 不蒜子和 GitHub API 都是匿名第三方服务，国内网络下偶发加载慢属正常
+- Vercount（vercount.one）和 GitHub API 都是匿名第三方服务，国内网络下偶发加载慢属正常
 - 主题版权要求保留页脚 "Powered by Astro & Firefly"，勿删
 - 仓库历史里保留有迁移前旧版手写 Astro 站点的提交，检索历史时注意区分
