@@ -166,11 +166,11 @@ comment: true              # false 关闭本文评论
 | `content/spec/friends.mdx` | 友链页面底部的自定义文字 |
 
 ### 5.4 页面开关
-`siteConfig.ts` 里 `pages` 段：每个页面（友链/留言板/动态/项目/相册/书签/打赏等）`true/false`。设为 `false` 会自动 404 并隐藏导航项。
+`siteConfig.ts` 里 `pages` 段：`true/false` 控制页面开关，设为 `false` 会自动 404 并隐藏导航项。当前在用的页面：友链、留言板、动态、项目、相册（打赏页代码保留、开关 false，放了收款图后改 true）。追番/Bangumi/VNDB/MyAnimeList/书签导航等主题的自带页面已于 2026-10-13 整页删除（源码和配置一并清理，git 历史可找回）。
 
 ### 5.5 评论管理
 - 评论数据在 GitHub Discussions：https://github.com/zijundidu/zijundidu.github.io/discussions （可删除/回复）
-- 首页"累计评论"数字是**构建时**拉取的：新评论出现后，要再次 push 部署才更新
+- 首页"累计评论"是**浏览器端实时统计**的（原理见 5.6b）：新评论出现后访客下次打开页面即更新，无需 push
 - 同理，关于页时间线也是构建时生成，随部署自动更新
 
 ### 5.6 访问统计
@@ -234,6 +234,8 @@ comment: true              # false 关闭本文评论
 | 头像 | 无本地文件，用 GitHub 远程头像 `https://github.com/zijundidu.png` | `profileConfig.ts` |
 
 **首页横幅标题下方的链接图标**（GitHub / Email / Sponsor / RSS）：`src/config/backgroundWallpaper.ts` 的 `homeText.links`。当前 Sponsor 跳转到 `/about/`，放了收款码后可改为 `/sponsor/`。
+
+**已整页删除的功能（2026-10-13）**：哔哩哔哩追番、番组计划 Bangumi、VNDB、MyAnimeList、书签导航 booknav、看板娘 Live2D/Spine（pio）、GreatVibes 示例字体——页面/组件/配置/类型/工具脚本已全部清理，只残留无害的 i18n 翻译词条。
 
 **已清理的死资源（2026-10-09，git 历史可找回）**：看板娘模型 `public/pio/`（15MB，看板娘开关已关）、主题作者的收款码/广告图/示例字体、无引用的示例图（`test.jpg`、`posts/images/`、`projects/images/`）、无引用的 js/css（marked/highlight/twikoo）、`anime-list.json`。若以后要开看板娘或打赏页，需重新准备对应文件。
 

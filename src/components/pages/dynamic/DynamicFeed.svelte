@@ -1,7 +1,6 @@
 <script lang="ts">
 import { onMount, tick } from "svelte";
 import ClientPagination from "@/components/common/ClientPagination.svelte";
-import { formatTimezoneOffset } from "@/utils/date-utils";
 import { fetchMemos } from "@/utils/memos-adapter";
 import { registerDynamicGallery } from "./dynamic-gallery";
 import { registerDynamicInlineComments } from "./dynamic-inline-comments";
@@ -171,16 +170,17 @@ function createItem(entry: DynamicData) {
 			time.textContent = new Intl.DateTimeFormat(
 				document.documentElement.lang || undefined,
 				{
-					timeZone: "UTC",
+					// 本地动态：published 是带时区解析出的正确时刻，按站点时区（北京时间）显示
+					timeZone: timezone,
 					year: "numeric",
 					month: "2-digit",
 					day: "2-digit",
 					hour: "2-digit",
 					minute: "2-digit",
 					second: "2-digit",
+					hourCycle: "h23",
 				},
 			).format(date);
-			time.textContent += ` ${formatTimezoneOffset(timezone, date)}`;
 		}
 	}
 	const location = root.querySelector<HTMLElement>("[data-dynamic-location]");
