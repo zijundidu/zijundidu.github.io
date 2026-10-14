@@ -69,9 +69,9 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 			titleSize: "4.5rem",
 			// 主页横幅副标题
 			subtitle: [
+				"保持好奇，保持更新，保持备份",
 				"给岁月以文明，而不是给文明以岁月",
 				"Not all those who wander are lost",
-				"保持好奇，保持更新，保持备份",
 				"To strive, to seek, to find, and not to yield",
 				"人生如逆旅，我亦是行人",
 				"We're all stories, in the end. Just make it a good one, eh?",
