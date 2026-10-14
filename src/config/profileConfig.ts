@@ -1,8 +1,9 @@
 import type { ProfileConfig } from "../types/profileConfig";
 
 export const profileConfig: ProfileConfig = {
-	// 头像：使用 GitHub 头像（远程 URL）
-	avatar: "https://github.com/zijundidu.png",
+	// 头像：本地文件（public/images/avatar.jpg，与博客同域，避免 github.com 头像域在国内被墙导致不显示）
+	// 更换 GitHub 头像后，重新从 https://github.com/zijundidu.png 下载覆盖该文件即可
+	avatar: "/images/avatar.jpg",
 
 	// 名字
 	name: "Kraken",

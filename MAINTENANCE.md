@@ -231,7 +231,7 @@ comment: true              # false 关闭本文评论
 | `public/assets/music/` | 背景音乐 mp3 + 封面（见第 2 章） | `musicConfig.ts` |
 | `public/assets/images/sponsor/` | 打赏收款码（当前为空）：放入 `wechat.png`/`alipay.png` 后，把 `sponsorConfig.ts` 对应条目 `enabled: true` 并打开 `siteConfig.ts` 的 `sponsor` 页面开关 | `sponsorConfig.ts` |
 | `public/favicon.svg` `public/favicon/` | 站点图标 | 浏览器标签页 |
-| 头像 | 无本地文件，用 GitHub 远程头像 `https://github.com/zijundidu.png` | `profileConfig.ts` |
+| `public/images/avatar.jpg` | 头像（本地文件，与博客同域）。更换 GitHub 头像后需手动更新：浏览器打开 `https://github.com/zijundidu.png` 另存为覆盖此文件（github.com 头像域国内不稳定，不能直接用远程 URL，否则头像时有时无） | `profileConfig.ts`、`friends.mdx` |
 
 **首页横幅标题下方的链接图标**（GitHub / Email / Sponsor / RSS）：`src/config/backgroundWallpaper.ts` 的 `homeText.links`。当前 Sponsor 跳转到 `/about/`，放了收款码后可改为 `/sponsor/`。
 

@@ -103,15 +103,9 @@ export function initImageLoadFadeIn(): void {
 				},
 				{ once: true },
 			);
-			img.addEventListener(
-				"error",
-				() => {
-					if (!container.classList.contains("cover-image-container")) {
-						placeholder.classList.add("loaded");
-					}
-				},
-				{ once: true },
-			);
+			// 加载失败时不做任何事：占位渐变保持可见（灰底块），
+			// 而不是淡出成彻底空白的区域；cover-image-container 的
+			// 错误回退由 CoverImage 组件自行处理
 		}
 	});
 }
