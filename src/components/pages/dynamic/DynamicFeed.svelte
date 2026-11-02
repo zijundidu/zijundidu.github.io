@@ -63,6 +63,16 @@ let searchInput: HTMLInputElement | null = null;
 let yearSelect: HTMLSelectElement | null = null;
 let restoreAnchorAfterRender = false;
 
+// 按站点时区取年份，年份筛选/下拉框/条目标记共用。
+// 注意：必须在组件作用域定义（曾在 applyFilters 内局部定义，
+// populateYears/createItem 引用时抛 ReferenceError 导致整页数据无法渲染）
+const yearFormatter = new Intl.DateTimeFormat("en-US", {
+	timeZone: timezone,
+	year: "numeric",
+});
+const tzFullYear = (ms: number): number =>
+	Number(yearFormatter.format(new Date(ms)));
+
 const pageEntries = $derived(
 	filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage),
 );
@@ -83,14 +93,6 @@ function updateUrl(clearHash = false) {
 }
 
 function applyFilters(resetPage = true) {
-	const tzFullYear = (ms: number): number =>
-		Number(
-			new Intl.DateTimeFormat("en-US", {
-				timeZone: timezone,
-				year: "numeric",
-			}).format(new Date(ms)),
-		);
-
 	const query = searchInput?.value.toLocaleLowerCase().trim() || "";
 	const year = yearSelect?.value || "all";
 	filtered = entries.filter(
