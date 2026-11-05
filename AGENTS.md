@@ -25,8 +25,10 @@ Kraken 的个人主页，基于 **Astro 7 + Firefly 主题**（[CuteLeaf/Firefly
 
 - **访问量/访客数**：Vercount 纯前端统计（组件沿用旧名 `src/components/analytics/BusuanziAnalytics.astro`，锚点兼容不蒜子）。数字填充到 `#busuanzi_value_site_pv` / `#busuanzi_value_uv`；展示行在 `src/components/widget/SiteStats.astro`
 - **累计评论数**：双层口径——构建时 `src/utils/comment-stats.ts` 拉 GitHub Discussions 作后备；页面加载后浏览器实时重算（只统计 giscus 机器人创建且路径仍存在于站内的 discussion），删除文章后自动剔除孤儿
-- **站点时间线**：`src/components/widget/SiteTimeline.astro`，合并 posts + dynamic + travel 按时间倒序，构建时静态生成；已挂载到 `src/pages/about.astro`
+- **站点时间线**：`src/components/widget/SiteTimeline.astro`，合并 posts + dynamic + travel 按年份分组折叠（最新年份默认展开），构建时静态生成；已挂载到 `src/pages/about.astro`
 - **评论**：Giscus，配置在 `src/config/commentConfig.ts`（repo `zijundidu/zijundidu.github.io`，`mapping: "pathname"`，与历史 discussion 标题一致，勿改）
+- **阅读进度条**：文章详情页顶部固定细进度条，脚本在 `src/pages/posts/[...slug].astro` 末尾（`window.__readingProgressCleanup` 清理，防 Swup 切页泄漏）
+- **头像自动同步**：`.github/workflows/sync-avatar.yml` 每周一把 GitHub 头像下载转为 `public/images/avatar.jpg` 并提交（有变化才提交，提交触发部署）；手动同步见 MAINTENANCE.md 5.9
 - **时间口径**：全站北京时间。`siteConfig.timezone`（Asia/Shanghai）控制显示；动态 frontmatter 时间必须带 `+08:00`，无偏移会被 YAML 按 UTC 解析
 - **导航栏切图按钮**：`#bg-wallpaper-next` 派发 `bannerCarouselNext` 事件，壁纸轮播脚本（WallpaperSection）监听并切下一张；背景视频功能已移除
 
@@ -48,3 +50,6 @@ Kraken 的个人主页，基于 **Astro 7 + Firefly 主题**（[CuteLeaf/Firefly
 - Vercount（vercount.one）和 GitHub API 都是匿名第三方服务，国内网络下偶发加载慢属正常
 - 主题版权要求保留页脚 "Powered by Astro & Firefly"，勿删
 - 仓库历史里保留有迁移前旧版手写 Astro 站点的提交，检索历史时注意区分
+- **取年份/数字不要 `Number(intl.format(...))`**：部分环境 ICU 会给年份加分组（"2,026"→NaN），用 `formatToParts` 取 part 后 `replace(/\D/g, "")`（正确写法见 SiteTimeline.astro / DynamicFeed.svelte）
+- **`Array.map` 不要裸传局部箭头函数**（如 `arr.map(tzYear)`）：本项目编译链下出现过裸传拿到 NaN、箭头包装正常的灵异行为，一律写 `arr.map((item) => fn(item))`
+- 本地构建若遇离奇怪异（改了代码行为不变），先清 `node_modules/.vite` 和 `node_modules/.astro` 再试（rolldown 转换缓存）

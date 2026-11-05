@@ -3,8 +3,11 @@ import { getCollection } from "astro:content";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import "@/styles/pages/travel-hero.css";
 import { Icon } from "astro-icon/components";
+import { siteConfig } from "@/config/siteConfig";
 import {
 	type TravelStats,
+	TRAVEL_TYPES,
+	TRAVEL_TYPE_STYLE,
 	calcStats,
 	provinceByGeoName,
 	provinceByShort,
@@ -29,6 +32,28 @@ for (const [slug, list] of byProvince) {
 
 // 全国总览
 const allStats = calcStats(records);
+
+// 类型 → 计数字段映射（TRAVEL_TYPES 顺序展示用）
+const TYPE_KEY: Record<string, "travel" | "hike" | "climb" | "drive"> = {
+	旅行: "travel",
+	徒步: "hike",
+	登山: "climb",
+	自驾: "drive",
+};
+
+// 最近一条足迹（按站点时区格式化为 YYYY-MM-DD）
+const latestRecord = records.reduce<(typeof records)[number] | null>(
+	(latest, r) => (!latest || r.data.date > latest.data.date ? r : latest),
+	null,
+);
+const latestDateText = latestRecord
+	? new Intl.DateTimeFormat("en-CA", {
+			timeZone: siteConfig.timezone || "UTC",
+			year: "numeric",
+			month: "2-digit",
+			day: "2-digit",
+		}).format(latestRecord.data.date)
+	: "";
 
 // ---- GeoJSON → SVG path（经度乘 cos(35°) 修正东西拉伸，形状接近真实比例）----
 const K = 14;
@@ -168,6 +193,23 @@ const hotspots = provincePaths.filter((p) => p.visited && p.centroid);
 							<span>出行</span>
 						</div>
 					</div>
+					<div class="hero-type-stats">
+						{TRAVEL_TYPES.map((t) => (
+							<span class:list={["type-badge", TRAVEL_TYPE_STYLE[t]]}>
+								{t} {allStats[TYPE_KEY[t]]}
+							</span>
+						))}
+					</div>
+					{
+						latestRecord && (
+							<div class="hero-latest">
+								<Icon name="material-symbols:history-rounded" class="text-sm" />
+								<span>
+									最近足迹：{latestDateText} · {latestRecord.data.title}
+								</span>
+							</div>
+						)
+					}
 					<div class="hero-progress">
 						<div class="progress-label">
 							<span>地图点亮</span>

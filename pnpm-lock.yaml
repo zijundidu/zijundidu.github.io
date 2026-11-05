@@ -128,9 +128,6 @@ importers:
       katex:
         specifier: ^0.18.7
         version: 0.18.7
-      l2d-widget:
-        specifier: ^0.1.1
-        version: 0.1.2
       marked:
         specifier: ^18.0.12
         version: 18.0.12
@@ -4021,9 +4018,6 @@ packages:
   klona@2.0.6:
     resolution: {integrity: sha512-dhG34DXATL5hSxJbIexCft8FChFXtmskoZYnoPWjXQuebWYCNkVeV3KkGegCK9CP1oswI/vQibS2GY7Em/sJJA==}
     engines: {node: '>= 8'}
-
-  l2d-widget@0.1.2:
-    resolution: {integrity: sha512-G96NqlH5qBIy6eNPo5eXKRFKEFJ6jHX9dKB9W9qmrZ1PXkbAkeOvoKal3a0zWxr3DkctodVMNwmXydTpfw005g==}
 
   launder@1.7.1:
     resolution: {integrity: sha512-mU6WRz5EusL9ZZuiZ5SO4Y6C0P9PAUR9iwdb6bzj4KDihm28DiHFw+/yk9DBH4f+Pv1wuzQ4e2jV3oQ7mkIqvw==}
@@ -10376,8 +10370,6 @@ snapshots:
   kleur@4.1.5: {}
 
   klona@2.0.6: {}
-
-  l2d-widget@0.1.2: {}
 
   launder@1.7.1:
     dependencies:

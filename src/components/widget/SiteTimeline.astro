@@ -1,17 +1,27 @@
 ---
 import { Icon } from "astro-icon/components";
 import { getCollection } from "astro:content";
+import { siteConfig } from "@/config/siteConfig";
 import I18nKey from "@/i18n/i18nKey";
 import { i18n } from "@/i18n/translation";
+import { provinceByShort } from "@/utils/travel-utils";
 import { getPostUrlBySlug } from "@/utils/url-utils";
 
-// 站点时间线：合并文章与动态，按时间倒序展示
+// 站点时间线：合并文章、动态与诗与远方，按年份分组折叠展示
 // 数据在构建时静态生成，发布新内容后重新部署即自动更新
 
 const posts = (await getCollection("posts")).filter((post) =>
 	import.meta.env.PROD ? !post.data.draft : true,
 );
 const dynamics = await getCollection("dynamic");
+const travels = await getCollection("travel");
+
+const TRAVEL_ICONS: Record<string, string> = {
+	旅行: "material-symbols:travel-explore-rounded",
+	徒步: "material-symbols:hiking-rounded",
+	登山: "material-symbols:mountain-flag-rounded",
+	自驾: "material-symbols:directions-car-rounded",
+};
 
 const items = [
 	...posts.map((post) => ({
@@ -36,12 +46,71 @@ const items = [
 			url: "/dynamic/",
 		};
 	}),
-]
-	.sort((a, b) => b.date.getTime() - a.date.getTime())
-	.slice(0, 30);
+	...travels.map((travel) => ({
+		date: travel.data.date,
+		icon:
+			TRAVEL_ICONS[travel.data.type] ??
+			"material-symbols:travel-explore-rounded",
+		text: `记录了${travel.data.province}的${travel.data.type}：《${travel.data.title}》`,
+		url: `/travel/${provinceByShort(travel.data.province)?.slug ?? ""}/`,
+	})),
+].sort((a, b) => b.date.getTime() - a.date.getTime());
 
-const formatDate = (date: Date) =>
-	`${date.getFullYear()} 年 ${date.getMonth() + 1} 月 ${date.getDate()} 日`;
+// 防御：内容层个别条目日期异常时不让整个构建失败
+const invalidItems = items.filter((item) => Number.isNaN(item.date.getTime()));
+if (invalidItems.length > 0) {
+	console.warn(
+		"[SiteTimeline] 跳过日期无效的条目:",
+		invalidItems.map((item) => item.text),
+	);
+}
+const validItems = items.filter((item) => !Number.isNaN(item.date.getTime()));
+
+// 按站点时区（北京时间）取年份/日期，避免 CI 的 UTC 环境在跨日时错位分组。
+// 注意：必须用 formatToParts 取年份再剥离非数字——部分环境的 ICU 会把年份
+// 格式化成分组形式（如 "2,026"），Number("2,026") 是 NaN，会导致分组塌成一条
+const TZ = siteConfig.timezone || "UTC";
+const yearFmt = new Intl.DateTimeFormat("en-US", {
+	timeZone: TZ,
+	year: "numeric",
+});
+const tzYear = (d: Date): number => {
+	try {
+		const part = yearFmt.formatToParts(d).find((p) => p.type === "year");
+		return part ? Number(part.value.replace(/\D/g, "")) : Number.NaN;
+	} catch {
+		return Number.NaN;
+	}
+};
+const datePartsFmt = new Intl.DateTimeFormat("en-US", {
+	timeZone: TZ,
+	year: "numeric",
+	month: "numeric",
+	day: "numeric",
+});
+const tzFullDate = (d: Date) => {
+	try {
+		const parts = Object.fromEntries(
+			datePartsFmt.formatToParts(d).map((p) => [p.type, p.value]),
+		);
+		const year = String(parts.year ?? "").replace(/\D/g, "");
+		return `${year} 年 ${Number(parts.month)} 月 ${Number(parts.day)} 日`;
+	} catch {
+		return "";
+	}
+};
+
+// 防御：Intl 格式化失败的条目（脏数据）单独剔除并告警
+const safeItems = validItems.filter((item) => {
+	const ok = !Number.isNaN(tzYear(item.date)) && tzFullDate(item.date) !== "";
+	if (!ok) {
+		console.warn("[SiteTimeline] 跳过无法格式化的条目:", item.text);
+	}
+	return ok;
+});
+const years = [...new Set(safeItems.map((item) => tzYear(item.date)))].sort(
+	(a, b) => b - a,
+);
 ---
 
 <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32 mt-4">
@@ -50,23 +119,81 @@ const formatDate = (date: Date) =>
 			<Icon name="material-symbols:timeline" class="text-(--primary)" />
 			{i18n(I18nKey.about) === "关于" ? "站点时间线" : "Timeline"}
 		</h2>
-		<ol class="relative border-l-2 border-(--primary) ml-3">
-			{items.map((item) => (
-				<li class="mb-5 ml-5">
-					<span class="absolute -left-[0.7rem] flex items-center justify-center w-6 h-6 rounded-full bg-(--primary) text-white">
-						<Icon name={item.icon} class="text-sm" />
-					</span>
-					<time class="block text-sm text-neutral-500 dark:text-neutral-400 mb-0.5">
-						{formatDate(item.date)}
-					</time>
-					<a
-						href={item.url}
-						class="text-neutral-800 dark:text-neutral-200 hover:text-(--primary) transition-colors"
-					>
-						{item.text}
-					</a>
-				</li>
-			))}
-		</ol>
+		{years.map((year, index) => {
+			const list = safeItems.filter((item) => tzYear(item.date) === year);
+			return (
+				<details class="year-group" open={index === 0}>
+					<summary class="year-summary">
+						<Icon
+							name="material-symbols:chevron-right-rounded"
+							class="year-chevron text-(--primary)"
+						/>
+						<span class="year-label">{year} 年</span>
+						<span class="year-count">{list.length} 条</span>
+					</summary>
+					<ul class="relative border-l-2 border-(--primary) ml-3 mt-3 mb-2">
+						{list.map((item) => (
+							<li class="mb-5 ml-5">
+								<span class="absolute -left-[0.7rem] flex items-center justify-center w-6 h-6 rounded-full bg-(--primary) text-white">
+									<Icon name={item.icon} class="text-sm" />
+								</span>
+								<time class="block text-sm text-neutral-500 dark:text-neutral-400 mb-0.5">
+									{tzFullDate(item.date)}
+								</time>
+								<a
+									href={item.url}
+									class="text-neutral-800 dark:text-neutral-200 hover:text-(--primary) transition-colors"
+								>
+									{item.text}
+								</a>
+							</li>
+						))}
+					</ul>
+				</details>
+			);
+		})}
 	</div>
 </div>
+
+<style>
+	.year-group {
+		margin-bottom: 0.5rem;
+	}
+	.year-summary {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		cursor: pointer;
+		user-select: none;
+		padding: 0.375rem 0.5rem;
+		border-radius: 0.5rem;
+		list-style: none;
+		transition: background-color 0.15s ease;
+	}
+	.year-summary::-webkit-details-marker {
+		display: none;
+	}
+	.year-summary:hover {
+		background: var(--btn-plain-bg-hover);
+	}
+	.year-chevron {
+		transition: transform 0.2s ease;
+	}
+	.year-group[open] .year-chevron {
+		transform: rotate(90deg);
+	}
+	.year-label {
+		font-weight: 700;
+		color: var(--neutral-800, #262626);
+	}
+	:global(.dark) .year-label {
+		color: var(--neutral-200, #e5e5e5);
+	}
+	.year-count {
+		font-size: 0.75rem;
+		color: var(--neutral-400, #a3a3a3);
+		background: var(--btn-plain-bg-hover);
+		border-radius: 9999px;
+		padding: 0.125rem 0.625rem;
+	}
+</style>

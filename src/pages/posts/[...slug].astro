@@ -731,4 +731,68 @@ const seriesData = await getSeriesPosts(entry);
 
   <!-- 评论 -->
   {entry.data.comment && !entry.data.password && <Comment post={entry} />}
+
+  <!-- 阅读进度条：固定在视口顶部，随文章滚动填充 -->
+  <script is:inline>
+    (function () {
+      // Swup 切页会重跑内联脚本，先清理上一页的实例（含进度条元素与监听器）
+      if (window.__readingProgressCleanup) {
+        window.__readingProgressCleanup();
+        window.__readingProgressCleanup = null;
+      }
+      const content = document.querySelector(".markdown-content");
+      if (!content) return;
+
+      const bar = document.createElement("div");
+      bar.id = "reading-progress-bar";
+      bar.setAttribute("aria-hidden", "true");
+      document.body.appendChild(bar);
+
+      let raf = 0;
+      const update = () => {
+        raf = 0;
+        const rect = content.getBoundingClientRect();
+        const total = rect.height - window.innerHeight;
+        if (total <= 0) {
+          // 正文一屏内能看完：不需要进度条
+          bar.style.opacity = "0";
+          return;
+        }
+        const done = Math.min(Math.max(-rect.top, 0), total);
+        bar.style.opacity = rect.top > 0 ? "0" : "1";
+        bar.style.width = `${(done / total) * 100}%`;
+      };
+      const onScroll = () => {
+        if (!raf) raf = requestAnimationFrame(update);
+      };
+
+      update();
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+
+      window.__readingProgressCleanup = () => {
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("resize", onScroll);
+        if (raf) cancelAnimationFrame(raf);
+        bar.remove();
+      };
+    })();
+  </script>
+
+  <style is:global>
+    #reading-progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0;
+      background: var(--primary);
+      z-index: 100;
+      pointer-events: none;
+      opacity: 0;
+      transition:
+        width 0.15s ease-out,
+        opacity 0.2s ease;
+    }
+  </style>
 </MainGridLayout>

@@ -112,6 +112,55 @@ comment: true              # false 关闭本文评论
 
 **正文图片**：放 `public/images/`，正文里写 `![说明](/images/xxx.jpg)`。
 
+### 3.1 正文增强语法（数学公式 / 流程图 / 代码块）
+
+**数学公式（KaTeX）**：行内用单个 `$` 包住，独占一行的公式用两个 `$`：
+
+```markdown
+质能方程 $E = mc^2$ 是行内公式。
+
+$$
+\int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi}
+$$
+```
+
+化学方程式用 `\ce{}`（已加载 mhchem 扩展）：`$\ce{2H2 + O2 -> 2H2O}$`。
+
+**流程图（Mermaid）**：直接用 ```mermaid 围栏代码块，构建时渲染成 SVG（自动生成亮/暗两套配色，可点开放大）：
+
+````markdown
+```mermaid
+flowchart LR
+  A[开始] --> B{判断}
+  B -->|是| C[处理]
+  B -->|否| D[结束]
+```
+````
+
+支持 flowchart / sequenceDiagram / classDiagram / gantt / mindmap 等 Mermaid 全部图类。
+
+**代码块**：
+- 代码超过 15 行自动折叠为"显示更多"（前 8 行预览），无需手写语法
+- 显式折叠指定行：在围栏头写 `collapse={1-3}`（1-3 行收起）
+- 显示行号：围栏头加 `linenumbers`，如 ```js linenumbers
+- 代码组（Tab 切换，适合"多种写法对比"）：
+
+````markdown
+::: code-group labels=[npm, pnpm]
+
+```bash
+npm install
+```
+
+```bash
+pnpm install
+```
+
+:::
+````
+
+**提示框**：`> [!NOTE]` / `> [!TIP]` / `> [!WARNING]` / `> [!IMPORTANT]`（GitHub 风格，写在引用块第一行）。
+
 ## 4. 相册管理与新增
 
 配置文件：`src/config/galleryConfig.ts` + 图片目录 `public/gallery/`。**相册页面当前无任何相册**，按下面步骤添加。
@@ -231,7 +280,7 @@ comment: true              # false 关闭本文评论
 | `public/assets/music/` | 背景音乐 mp3 + 封面（见第 2 章） | `musicConfig.ts` |
 | `public/assets/images/sponsor/` | 打赏收款码（当前为空）：放入 `wechat.png`/`alipay.png` 后，把 `sponsorConfig.ts` 对应条目 `enabled: true` 并打开 `siteConfig.ts` 的 `sponsor` 页面开关 | `sponsorConfig.ts` |
 | `public/favicon.svg` `public/favicon/` | 站点图标 | 浏览器标签页 |
-| `public/images/avatar.jpg` | 头像（本地文件，与博客同域）。更换 GitHub 头像后需手动更新：浏览器打开 `https://github.com/zijundidu.png` 另存为覆盖此文件（github.com 头像域国内不稳定，不能直接用远程 URL，否则头像时有时无） | `profileConfig.ts`、`friends.mdx` |
+| `public/images/avatar.jpg` | 头像（本地文件，与博客同域）。**每周一 CI 自动从 GitHub 同步**（`.github/workflows/sync-avatar.yml`），换了 GitHub 头像最多一周自动生效；想立刻生效就手动：浏览器打开 `https://github.com/zijundidu.png` 另存为覆盖此文件（github.com 头像域国内不稳定，不能直接用远程 URL，否则头像时有时无） | `profileConfig.ts`、`friends.mdx` |
 
 **首页横幅标题下方的链接图标**（GitHub / Email / Sponsor / RSS）：`src/config/backgroundWallpaper.ts` 的 `homeText.links`。当前 Sponsor 跳转到 `/about/`，放了收款码后可改为 `/sponsor/`。
 
@@ -240,6 +289,8 @@ comment: true              # false 关闭本文评论
 **已整页删除的功能（2026-10-13 第二轮）**：背景视频（含本地视频文件与 BackgroundPlayer）、樱花特效（含显示设置面板的特效标签页）、SiteInfo"站点信息"组件、reading-time/ci-info 无用依赖。导航栏播放按钮改为"切换背景图"。
 
 **已整页删除的功能（2026-10-13）**：哔哩哔哩追番、番组计划 Bangumi、VNDB、MyAnimeList、书签导航 booknav、看板娘 Live2D/Spine（pio）、GreatVibes 示例字体——页面/组件/配置/类型/工具脚本已全部清理，只残留无害的 i18n 翻译词条。
+
+**2026-11-02 更新记录**：① 公告组件桌面端+移动端全部关闭（`sidebarConfig.ts`，想开就把对应 `enable` 改回 `true` 并在 `announcementConfig.ts` 写公告内容）；② 音乐播放器彻底关闭（`musicConfig.ts` 的 `showInNavbar`/`showInSidebar` 均为 `false`，导航入口、侧栏组件、全站播放器实例都不再挂载）；③ 删除 l2d-widget 残留依赖；④ 文章页新增顶部阅读进度条（无需配置）；⑤ "关于"页站点时间线改为按年份折叠（最新年份默认展开，点年份标题可收起/展开），并纳入诗与远方记录；⑥ 诗与远方导览头新增类型计数徽章和最近足迹；⑦ 新增 `sync-avatar.yml`：每周一自动同步 GitHub 头像到 `public/images/avatar.jpg`。
 
 **已清理的死资源（2026-10-09，git 历史可找回）**：看板娘模型 `public/pio/`（15MB，看板娘开关已关）、主题作者的收款码/广告图/示例字体、无引用的示例图（`test.jpg`、`posts/images/`、`projects/images/`）、无引用的 js/css（marked/highlight/twikoo）、`anime-list.json`。若以后要开看板娘或打赏页，需重新准备对应文件。
 
@@ -267,6 +318,7 @@ image: ""                    # 可选，封面图路径
 - 地图点亮该省份，悬停显示该省统计（已游览 X 个地方 · 徒步 X 次 · 登山 X 次 · 自驾 X 次），点击进入省份列表页
 - 看板"最后活动"和首页侧边栏日历会计入（在日历里按文章类别展示）
 - 省份页导览头、统计芯片自动更新
+- 地图页导览头部自动更新：省份/地方/出行总览芯片、四种类型计数徽章、地图点亮进度条、最近足迹日期
 
 ### 5.11 文章页的「相关文章 / 随机文章」推荐原理
 

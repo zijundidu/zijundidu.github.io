@@ -64,14 +64,24 @@ let yearSelect: HTMLSelectElement | null = null;
 let restoreAnchorAfterRender = false;
 
 // 按站点时区取年份，年份筛选/下拉框/条目标记共用。
-// 注意：必须在组件作用域定义（曾在 applyFilters 内局部定义，
-// populateYears/createItem 引用时抛 ReferenceError 导致整页数据无法渲染）
+// 必须在组件作用域定义（曾在 applyFilters 内局部定义，populateYears/createItem
+// 引用时抛 ReferenceError 导致整页数据无法渲染）。
+// 注意用 formatToParts 取年份：部分环境的 ICU 会把年份格式化成分组形式
+//（如 "2,026"），Number("2,026") 是 NaN，会导致年份筛选/下拉框失效
 const yearFormatter = new Intl.DateTimeFormat("en-US", {
 	timeZone: timezone,
 	year: "numeric",
 });
-const tzFullYear = (ms: number): number =>
-	Number(yearFormatter.format(new Date(ms)));
+const tzFullYear = (ms: number): number => {
+	try {
+		const part = yearFormatter
+			.formatToParts(new Date(ms))
+			.find((p) => p.type === "year");
+		return part ? Number(part.value.replace(/\D/g, "")) : Number.NaN;
+	} catch {
+		return Number.NaN;
+	}
+};
 
 const pageEntries = $derived(
 	filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage),

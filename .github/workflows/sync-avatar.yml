@@ -1,0 +1,46 @@
+name: sync-avatar
+
+# 定期把 GitHub 头像同步到仓库（public/images/avatar.jpg，与博客同域），
+# 换了 GitHub 头像后最多一周自动生效，无需手动下载。
+# 手动触发：Actions 页面选择本工作流 → Run workflow
+on:
+  schedule:
+    # 每周一 05:23 UTC（北京时间 13:23），避开整点拥堵
+    - cron: "23 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-avatar
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: 下载 GitHub 头像并统一转为 JPEG
+        run: |
+          set -euo pipefail
+          curl -sSL --max-time 30 -o /tmp/avatar.src "https://github.com/zijundidu.png"
+          pip install --quiet pillow
+          python3 - <<'EOF'
+          from PIL import Image
+          img = Image.open("/tmp/avatar.src").convert("RGB")
+          img.thumbnail((460, 460))
+          img.save("public/images/avatar.jpg", "JPEG", quality=90)
+          EOF
+
+      - name: 有变化才提交（提交会触发部署）
+        run: |
+          if git diff --quiet -- public/images/avatar.jpg; then
+            echo "头像无变化，跳过"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add public/images/avatar.jpg
+            git commit -m "chore: 自动同步 GitHub 头像"
+            git push
+          fi
