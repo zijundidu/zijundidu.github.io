@@ -30,6 +30,7 @@ export const PROVINCES: ProvinceInfo[] = [
 	{ slug: "guangxi", geoName: "广西壮族自治区", shortName: "广西" },
 	{ slug: "hainan", geoName: "海南省", shortName: "海南" },
 	{ slug: "sichuan", geoName: "四川省", shortName: "四川" },
+	{ slug: "chongqing", geoName: "重庆市", shortName: "重庆" },
 	{ slug: "guizhou", geoName: "贵州省", shortName: "贵州" },
 	{ slug: "yunnan", geoName: "云南省", shortName: "云南" },
 	{ slug: "xizang", geoName: "西藏自治区", shortName: "西藏" },
