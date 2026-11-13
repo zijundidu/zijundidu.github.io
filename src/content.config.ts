@@ -177,7 +177,9 @@ const travelCollection: ContentCollection<TravelData> = defineCollection({
 		province: z.string(), // 常用名，如"四川"，见 src/utils/travel-utils.ts
 		type: z.enum(["旅行", "徒步", "登山", "自驾"]),
 		date: z.date(),
-		location: z.string().default(""),
+		// 单地点写字符串，一次行程多地点写数组（同省）：
+		// location: 稻城亚丁  /  location: [芜湖, 南京]
+		location: z.union([z.string(), z.array(z.string())]).default(""),
 		description: z.string().default(""),
 		image: z.string().default(""),
 	}),

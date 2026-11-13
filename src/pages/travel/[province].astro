@@ -6,8 +6,10 @@ import { Icon } from "astro-icon/components";
 import {
 	TRAVEL_TYPE_STYLE,
 	calcStats,
+	formatLocations,
 	provinceByShort,
 	provinceBySlug,
+	toLocationArray,
 } from "@/utils/travel-utils";
 
 export async function getStaticPaths() {
@@ -110,13 +112,13 @@ function fmt(d: Date): string {
 									/>
 									{fmt(r.data.date)}
 								</span>
-								{r.data.location && (
+								{toLocationArray(r.data.location).length > 0 && (
 									<span class="flex items-center gap-1">
 										<Icon
 											name="material-symbols:location-on-outline-rounded"
 											class="text-sm"
 										/>
-										{r.data.location}
+										{formatLocations(toLocationArray(r.data.location))}
 									</span>
 								)}
 							</div>

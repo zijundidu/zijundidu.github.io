@@ -3,7 +3,7 @@ import { getCollection, render } from "astro:content";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import Markdown from "@components/common/Markdown.astro";
 import { Icon } from "astro-icon/components";
-import { TRAVEL_TYPE_STYLE, provinceByShort } from "@/utils/travel-utils";
+import { TRAVEL_TYPE_STYLE, formatLocations, provinceByShort, toLocationArray } from "@/utils/travel-utils";
 
 export async function getStaticPaths() {
 	const records = await getCollection("travel");
@@ -67,13 +67,13 @@ function fmt(d: Date): string {
 						{fmt(entry.data.date)}
 					</span>
 					{
-						entry.data.location && (
+						toLocationArray(entry.data.location).length > 0 && (
 							<span class="flex items-center gap-1">
 								<Icon
 									name="material-symbols:location-on-outline-rounded"
 									class="text-base"
 								/>
-								{entry.data.location}
+								{formatLocations(toLocationArray(entry.data.location))}
 							</span>
 						)
 					}

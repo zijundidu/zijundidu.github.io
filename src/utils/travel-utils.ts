@@ -73,9 +73,15 @@ export function emptyStats(): TravelStats {
 interface TravelLike {
 	data: {
 		type: string;
-		location: string;
+		location: string | string[];
 	};
 }
+
+/** 统一规整为地点数组：支持字符串（单地点）或数组（一次行程多地点，同省） */
+export const toLocationArray = (location: string | string[]): string[] =>
+	(typeof location === "string" ? [location] : location)
+		.map((s) => s.trim())
+		.filter(Boolean);
 
 export function calcStats<T extends TravelLike>(records: T[]): TravelStats {
 	const s = emptyStats();
@@ -86,12 +92,18 @@ export function calcStats<T extends TravelLike>(records: T[]): TravelStats {
 		else if (r.data.type === "徒步") s.hike++;
 		else if (r.data.type === "登山") s.climb++;
 		else if (r.data.type === "自驾") s.drive++;
-		const loc = r.data.location.trim();
-		if (loc) places.add(loc);
+		// location 支持一次旅行写多个地方，每个地方单独计入"已游览 X 个地方"
+		for (const loc of toLocationArray(r.data.location)) {
+			places.add(loc);
+		}
 	}
 	s.places = places.size;
 	return s;
 }
+
+/** 多个地点展示时用顿号连接：["南京", "芜湖"] → "南京、芜湖" */
+export const formatLocations = (locations: string[]): string =>
+	locations.join("、");
 
 // 记录类型的徽标配色（Tailwind 工具类）
 export const TRAVEL_TYPE_STYLE: Record<string, string> = {
