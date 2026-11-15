@@ -5,7 +5,6 @@ type: 旅行
 date: 2023-01-06
 location: 郑州
 description: 出差郑州
-image:
 ---
 
 ## 行程

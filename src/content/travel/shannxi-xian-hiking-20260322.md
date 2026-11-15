@@ -5,7 +5,6 @@ type: 徒步
 date: 2026-03-22
 location: 西安
 description: 第一次徒步，净业寺+卧佛寺
-image:
 ---
 
 ## 行程

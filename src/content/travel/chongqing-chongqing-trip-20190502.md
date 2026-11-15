@@ -5,7 +5,6 @@ type: 旅行
 date: 2019-05-02
 location: 重庆
 description: 大学和当时的女朋友以及朋友一起去重庆旅行
-image: ""
 ---
 
 ## 行程

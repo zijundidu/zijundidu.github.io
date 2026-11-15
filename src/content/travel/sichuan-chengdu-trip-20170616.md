@@ -5,7 +5,7 @@ type: 旅行
 date: 2017-06-16
 location: 成都
 description: 高考后人生第一次出省旅行，成都5天
-image: ""
+image: '""'
 ---
 # 高考后出省成都旅行
 ## 行程

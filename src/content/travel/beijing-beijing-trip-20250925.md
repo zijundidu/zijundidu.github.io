@@ -5,7 +5,6 @@ type: 旅行
 date: 2025-09-25
 location: 北京
 description: 出差北京
-image:
 ---
 
 ## 行程

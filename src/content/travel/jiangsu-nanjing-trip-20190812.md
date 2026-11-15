@@ -3,9 +3,10 @@ title: 南京比赛旅行
 province: 江苏
 type: 旅行
 date: 2019-08-12
-location: [南京, 芜湖]
+location:
+  - 南京
+  - 芜湖
 description: 芜湖参加比赛后在南京游玩
-image: ""
 ---
 
 ## 行程
