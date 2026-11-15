@@ -131,7 +131,10 @@ const postsCollection: CollectionConfig<
 		updated: z.date().optional(),
 		draft: z.boolean().optional().default(false),
 		description: z.string().optional().default(""),
-		image: z.string().optional().default(""),
+		image: z
+			.string()
+			.nullish()
+			.transform((v) => v ?? ""),
 		tags: z.array(z.string()).optional().default([]),
 		category: z.string().optional().nullable().default(""),
 		lang: z.string().optional().default(""),
@@ -181,7 +184,10 @@ const travelCollection: ContentCollection<TravelData> = defineCollection({
 		// location: 稻城亚丁  /  location: [芜湖, 南京]
 		location: z.union([z.string(), z.array(z.string())]).default(""),
 		description: z.string().default(""),
-		image: z.string().default(""),
+		image: z
+			.string()
+			.nullish()
+			.transform((v) => v ?? ""),
 	}),
 });
 
@@ -193,7 +199,10 @@ const projectsCollection: ContentCollection<ProjectData> = defineCollection({
 		draft: z.boolean().optional().default(false),
 		order: z.number().optional(),
 		description: z.string().optional().default(""),
-		image: z.string().optional().default(""),
+		image: z
+			.string()
+			.nullish()
+			.transform((v) => v ?? ""),
 		tags: z.array(z.string()).optional().default([]),
 		link: z
 			.array(
