@@ -5,7 +5,7 @@ type: 旅行
 date: 2022-08-17
 location: 太原
 description: 出差太原
-image: '""'
+image: ""
 ---
 
 ## 行程

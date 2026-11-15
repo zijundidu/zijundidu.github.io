@@ -5,7 +5,7 @@ type: 登山
 date: 2025-05-01
 location: 华阴
 description: 夜爬华山，干就完了
-image: '""'
+image: ""
 ---
 
 ## 行程

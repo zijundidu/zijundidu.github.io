@@ -5,7 +5,7 @@ type: 旅行
 date: 2023-06-14
 location: 上海
 description: 出差上海
-image: '""'
+image: ""
 ---
 
 ## 行程

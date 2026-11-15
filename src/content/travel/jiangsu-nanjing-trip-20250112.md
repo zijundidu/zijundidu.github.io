@@ -5,7 +5,7 @@ type: 旅行
 date: 2025-01-12
 location: 南京
 description: 出差南京抽空旅行
-image: '""'
+image: ""
 ---
 
 ## 行程

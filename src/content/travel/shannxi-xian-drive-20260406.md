@@ -5,7 +5,7 @@ type: 自驾
 date: 2026-04-06
 location: 西安
 description: 自驾临潼骊山跑山
-image: '""'
+image: ""
 ---
 
 ## 行程
