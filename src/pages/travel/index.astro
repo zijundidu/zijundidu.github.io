@@ -312,6 +312,15 @@ const hotspots = provincePaths.filter((p) => p.visited && p.centroid);
 				document.body.appendChild(tip);
 			}
 
+				// Swup 无刷新跳转不会清理 body 上的 fixed 悬浮框，残留到下一页
+				// （曾出现省份页挂着"黑龙江 还没有足迹"）。跳转完成后直接移除，回到地图页脚本会重建。
+				if (!window.__travelTooltipSwupCleanup) {
+					window.__travelTooltipSwupCleanup = true;
+					document.addEventListener("swup:contentReplaced", () => {
+						document.getElementById("travel-tooltip")?.remove();
+					});
+				}
+
 			map
 				.querySelectorAll(".province, .hotspot")
 				.forEach((el) => {
@@ -346,6 +355,7 @@ const hotspots = provincePaths.filter((p) => p.visited && p.centroid);
 
 					if (visited) {
 						el.addEventListener("click", () => {
+							tip.style.opacity = "0"; // 先收起悬浮框再跳转，避免 hover 态的提示残留到下一页
 							const url = `/travel/${slug}/`;
 							// Swup 3 的跳转 API 是 navigate()（visit 不存在）
 							if (window.swup && typeof window.swup.navigate === "function") {
