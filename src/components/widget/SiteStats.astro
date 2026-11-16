@@ -7,6 +7,7 @@ import I18nKey from "@/i18n/i18nKey";
 import { i18n } from "@/i18n/translation";
 import type { WidgetComponentConfig } from "@/types/config";
 import { getTotalComments, COMMENT_COUNTER_SNIPPET_INFO } from "@/utils/comment-stats";
+import { getLastCommitTime } from "@/utils/last-activity";
 import {
 	getCategoryList,
 	getSortedPosts,
@@ -77,8 +78,8 @@ function formatNumber(num: number): string {
 	return num.toLocaleString();
 }
 
-// 获取「最后活动」时间：文章取 published 与 updated 中较新的那个，动态取 published，
-// 再从全部内容里取最大值。这样新发文章/动态和修改老文章都会刷新该字段。
+// 获取内容日期最大值：文章取 published 与 updated 中较新的那个，动态取 published，
+// 诗与远方取 date。仅作为「最后活动」的后备/兜底口径。
 const getActivityDate = (post: (typeof posts)[number]): Date => {
 	const { published, updated } = post.data;
 	if (updated && updated > published) return updated;
@@ -88,21 +89,29 @@ const getActivityDate = (post: (typeof posts)[number]): Date => {
 const dynamics = await getCollection("dynamic");
 const travels = await getCollection("travel");
 
-let lastActivityDate = posts.reduce<Date | null>((latest, post) => {
+let contentMaxDate = posts.reduce<Date | null>((latest, post) => {
 	const current = getActivityDate(post);
 	if (!latest || current > latest) return current;
 	return latest;
 }, null);
 for (const d of dynamics) {
-	if (!lastActivityDate || d.data.published > lastActivityDate) {
-		lastActivityDate = d.data.published;
+	if (!contentMaxDate || d.data.published > contentMaxDate) {
+		contentMaxDate = d.data.published;
 	}
 }
 for (const t of travels) {
-	if (!lastActivityDate || t.data.date > lastActivityDate) {
-		lastActivityDate = t.data.date;
+	if (!contentMaxDate || t.data.date > contentMaxDate) {
+		contentMaxDate = t.data.date;
 	}
 }
+
+// 「最后活动」以最近一次 git 提交时间为准：任何改动（含补录旧日期的诗与远方）提交部署即刷新。
+// 与内容日期最大值取较新者，防止未来日期的内容把活动时间拉到提交之后；无 git 环境回退内容日期。
+const commitTime = getLastCommitTime();
+const lastActivityDate =
+	commitTime && (!contentMaxDate || commitTime > contentMaxDate)
+		? commitTime
+		: contentMaxDate;
 
 const lastPostDate = lastActivityDate ? lastActivityDate.toISOString() : null;
 

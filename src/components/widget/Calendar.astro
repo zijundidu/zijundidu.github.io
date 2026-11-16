@@ -358,11 +358,13 @@ const dynamicLabel = i18n(I18nKey.dynamic);
       });
     }
     
-    // 渲染日历格子
+    // 渲染日历格子：只有有产出的日期可点击（cursor-pointer），
+    // 无产出日期与月初占位格不可点击；点击无产出日期不会清除已有选中态（setupClickHandlers 里同样有守卫）
     calendarGrid.innerHTML = calendarDays.map(({day, hasPost, count, dateKey}) => {
       const isToday = day === currentDate && isCurrentMonth;
       const classes = [
-        "calendar-day aspect-square flex items-center justify-center rounded-sm text-sm relative cursor-pointer"
+        "calendar-day aspect-square flex items-center justify-center rounded-sm text-sm relative",
+        day && hasPost ? "cursor-pointer" : "cursor-default"
       ];
       
       if (!day) {
