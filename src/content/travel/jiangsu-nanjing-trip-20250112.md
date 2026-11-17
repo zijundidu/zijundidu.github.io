@@ -1,5 +1,5 @@
 ---
-title: 南京出差抽空旅行
+title: 南京出差
 province: 江苏
 type: 旅行
 date: 2025-01-12
