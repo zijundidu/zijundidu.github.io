@@ -3,7 +3,7 @@ title: 端午节成都SoloTrip
 province: 四川
 type: 旅行
 date: 2026-06-19
-location: 成都
+location: "[成都,广汉]"
 description: 端午节成都SoloTrip，说走就走的旅行
 image:
 ---
