@@ -52,4 +52,5 @@ Kraken 的个人主页，基于 **Astro 7 + Firefly 主题**（[CuteLeaf/Firefly
 - 仓库历史里保留有迁移前旧版手写 Astro 站点的提交，检索历史时注意区分
 - **取年份/数字不要 `Number(intl.format(...))`**：部分环境 ICU 会给年份加分组（"2,026"→NaN），用 `formatToParts` 取 part 后 `replace(/\D/g, "")`（正确写法见 SiteTimeline.astro / DynamicFeed.svelte）
 - **`Array.map` 不要裸传局部箭头函数**（如 `arr.map(tzYear)`）：本项目编译链下出现过裸传拿到 NaN、箭头包装正常的灵异行为，一律写 `arr.map((item) => fn(item))`
+- 正文里写**半角冒号+文字**（如 `9:16`、`TODO:finish`）会被 remark-directive 吞成"指令"再渲染成非法标签；`src/plugins/remark-directive-rehype.js` 已对白名单（github/code-group/admonition）外的指令统一还原为原文。新增自定义指令时必须把名字加进该文件的 `CUSTOM_ELEMENT_DIRECTIVES`，否则不会生效
 - 本地构建若遇离奇怪异（改了代码行为不变），先清 `node_modules/.vite` 和 `node_modules/.astro` 再试（rolldown 转换缓存）
