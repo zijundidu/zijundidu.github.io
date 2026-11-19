@@ -79,8 +79,16 @@ interface TravelLike {
 }
 
 /** 统一规整为地点数组：支持字符串（单地点）或数组（一次行程多地点，同省） */
+// Obsidian/同步工具常把 YAML 列表写成带引号的字符串（"[兰州, 甘南]"），
+// 统一剥掉方括号并按逗号拆开，页面不再显示方括号；正常写法原样通过
+function splitLocationString(value: string): string[] {
+	const m = value.match(/^\s*\[(.*)\]\s*$/);
+	if (m) return m[1].split(/[,，]/);
+	return [value];
+}
+
 export const toLocationArray = (location: string | string[]): string[] =>
-	(typeof location === "string" ? [location] : location)
+	(typeof location === "string" ? splitLocationString(location) : location)
 		.map((s) => s.trim())
 		.filter(Boolean);
 

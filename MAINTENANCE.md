@@ -185,6 +185,8 @@ pnpm install
 
 4. `git push` 部署。完事——照片不用一张张登记，构建时自动扫描目录。
 
+**图片体积（重要）**：手机原图直接上传即可，**不用手动压缩**。push 后 GitHub Actions 会自动压缩（`compress-gallery` 工作流 → `scripts/compress-gallery.mjs`）：长边超过 2560 才缩放、JPEG 质量 85（mozjpeg 渐进式）、剥离 EXIF、PNG 照片转 JPEG——视觉近无损，体积通常降到原来的 1/5～1/10，压缩结果自动提交回仓库。已小于 500KB 的图不动；想本地手动跑一次用 `node scripts/compress-gallery.mjs`（`--all` 强制重压全部，会再次有损，一般用不到）。
+
 **管理能力**：标签筛选（页面上方）、密码加密、瀑布流列宽（`columnWidth`，默认 240）、相册按日期排序。删除相册 = 删配置项 + 删目录。
 
 ## 5. 其他必知用法

@@ -1,0 +1,55 @@
+name: compress-gallery
+
+# 相册图片自动压缩：push 相册照片后触发，压缩结果自动提交回仓库。
+# 压缩参数见 scripts/compress-gallery.mjs（长边 2560、JPEG q85 mozjpeg 渐进式，视觉近无损）。
+# 提交信息含"自动压缩相册"时跳过本工作流，防止自我触发循环；部署工作流不受信息过滤影响，会正常发布压缩结果。
+on:
+  push:
+    branches: [main]
+    paths:
+      - "public/gallery/**"
+      - "scripts/compress-gallery.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: compress-gallery
+
+jobs:
+  compress:
+    if: ${{ !contains(github.event.head_commit.message, '自动压缩相册') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.22.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 压缩相册图片
+        run: node scripts/compress-gallery.mjs
+
+      - name: 提交压缩结果
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/gallery scripts/.gallery-compressed.json
+          if git diff --cached --quiet; then
+            echo "没有需要压缩的图片"
+          else
+            git commit -m "chore: 自动压缩相册图片"
+            git pull --rebase
+            git push
+          fi

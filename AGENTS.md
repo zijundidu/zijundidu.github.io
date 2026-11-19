@@ -55,4 +55,6 @@ Kraken 的个人主页，基于 **Astro 7 + Firefly 主题**（[CuteLeaf/Firefly
 - 正文里写**半角冒号+文字**（如 `9:16`、`TODO:finish`）会被 remark-directive 吞成"指令"再渲染成非法标签；`src/plugins/remark-directive-rehype.js` 已对白名单（github/code-group/admonition）外的指令统一还原为原文。新增自定义指令时必须把名字加进该文件的 `CUSTOM_ELEMENT_DIRECTIVES`，否则不会生效
 - 段落内**单个换行渲染为换行**（`src/plugins/remark-breaks.js`，对齐 Obsidian 行为），写内容时不用行尾两个空格硬换行；`---` 分隔符必须上下留空行，紧跟文字行会被当成 setext 标题下划线吞掉
 - 列表条目间空行会把整个列表变成 loose（所有条目套 `<p>` 像分段），`src/plugins/remark-split-list-groups.js` 已在构建时按空行边界拆成多个紧凑列表（组内紧凑、组间留白）；改动列表渲染的插件注意和它排序（它依赖 position，要在 parse 后尽早跑）
+- 相册图片 push 后由 `compress-gallery` 工作流自动压缩（`scripts/compress-gallery.mjs`，幂等记录在 `scripts/.gallery-compressed.json`）——不要对已压缩的图片二次处理，也别把该状态文件移到 public 下
+- 诗与远方 `location` 写成带引号的 `"[兰州, 甘南]"` 也能正确解析（`toLocationArray` 自动拆数组），但新内容仍应写标准 YAML 列表 `[兰州, 甘南]`
 - 本地构建若遇离奇怪异（改了代码行为不变），先清 `node_modules/.vite` 和 `node_modules/.astro` 再试（rolldown 转换缓存）
