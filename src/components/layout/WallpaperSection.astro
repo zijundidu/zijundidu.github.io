@@ -415,9 +415,12 @@ const wallpaperPosition = state.isFullscreenMode
                 }
             });
 
-            // 随机首张：只有被抽中的这一张会真的下载，其余仍留在 <template> 里
+            // 随机首张：只有被抽中的这一张会真的下载，其余仍留在 <template> 里。
+            // 下标优先用 <head> 预加载脚本选好的（window.__wpStartIdx），保证预加载的就是显示的那张
             var slides = getVisibleSlides();
-            var startIdx = slides.length > 1 ? Math.floor(Math.random() * slides.length) : 0;
+            var startIdx = (typeof window.__wpStartIdx === "number" && window.__wpStartIdx >= 0 && window.__wpStartIdx < slides.length)
+                ? window.__wpStartIdx
+                : (slides.length > 1 ? Math.floor(Math.random() * slides.length) : 0);
             var firstSlide = slides[startIdx];
             // .slide-item 自带 1000ms 的 opacity 过渡，首张不该吃它（它是 LCP 元素）。
             // 必须在下面加 active 之前就关掉，否则过渡已经启动了。

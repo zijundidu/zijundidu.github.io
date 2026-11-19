@@ -5,6 +5,8 @@ import HeaderTopRow from "@components/layout/HeaderTopRow.astro";
 import NavMenuPanel from "@components/layout/NavMenuPanel.astro";
 import SideBar from "@components/layout/SideBar.astro";
 import type { MarkdownHeading } from "astro";
+import { getImage } from "astro:assets";
+import path from "node:path";
 import FloatingControls from "@/components/controls/FloatingControls.astro";
 import CategoryBar from "@/components/layout/CategoryBar.astro";
 import SidebarColumn from "@/components/layout/SidebarColumn.astro";
@@ -15,6 +17,7 @@ import {
 	siteConfig,
 } from "@/config";
 import { getBannerVisibilityState } from "@/utils/banner-visibility-utils";
+import { getImageQuality } from "@/utils/image-utils";
 import { getBackgroundImages, isHomePage } from "@/utils/layout-utils";
 import { resolveNavMenuLinks } from "@/utils/nav-menu-utils";
 import { getEffectiveSidebarState } from "@/utils/sidebar-effective-utils";
@@ -88,11 +91,80 @@ const {
 	gridColumnStyle,
 	gridDataAttrs,
 } = sidebar;
+
+// 壁纸首屏预加载。背景图 markup 在 body 约 30% 处（<template> 内、靠脚本实例化），
+// 浏览器要解析到那里才发现请求；在 <head> 里预加载把发现提前，背景图"先出来"。
+// URL 与 ImageWrapper/Picture 产物走同一 getImage 管线（同参数 → 同内容哈希），
+// media 按断点门控，桌面端不会白下手机图。随机下标存在 window.__wpStartIdx，
+// 壁纸轮播脚本实例化同一张，预加载不浪费。
+const wallpaperPreload = await (async () => {
+	if (!hasWallpaper || backgroundImages.desktop.length === 0) return null;
+	const files = import.meta.glob("../**/*.{png,jpg,jpeg,webp,avif}", {
+		import: "default",
+	});
+	const q = getImageQuality();
+	const mq = Math.round(q * 0.9);
+	const srcsetFor = async (src: string, widths: number[], quality: number) => {
+		const normalized = path
+			.normalize(path.join("../", src))
+			.replace(/\\/g, "/");
+		const meta = (await files[normalized]?.()) as
+			| { src: string; width: number; height: number }
+			| undefined;
+		if (!meta) return null;
+		const parts = await Promise.all(
+			widths.map(async (w) => {
+				const img = await getImage({
+					src: meta,
+					width: w,
+					quality,
+					format: "webp",
+				});
+				return `${img.src} ${w}w`;
+			}),
+		);
+		return parts.join(", ");
+	};
+	const desktop: string[] = [];
+	for (const src of backgroundImages.desktop) {
+		const s = await srcsetFor(src, [1280, 1920], q);
+		if (s) desktop.push(s);
+	}
+	const mobile: string[] = [];
+	for (const src of backgroundImages.mobile ?? []) {
+		const s = await srcsetFor(src, [640, 828], mq);
+		if (s) mobile.push(s);
+	}
+	return desktop.length > 0 ? { desktop, mobile } : null;
+})();
 ---
 
 <Layout title={title} description={description} lang={lang} setOGTypeArticle={setOGTypeArticle} postSlug={postSlug} postCoverImage={postCoverImage} ogImageWidth={ogImageWidth} ogImageHeight={ogImageHeight} ogImageAlt={ogImageAlt} hasWallpaper={hasWallpaper}>
 
-<slot slot="head" name="head" />
+<Fragment slot="head">
+	{wallpaperPreload && (
+		<script is:inline define:vars={{ wallpaperPreload }} data-swup-ignore-script>
+			(function () {
+				var d = wallpaperPreload.desktop;
+				var m = wallpaperPreload.mobile;
+				var idx = Math.floor(Math.random() * d.length);
+				// 壁纸轮播脚本实例化同一张，保证预加载的就是显示的那张
+				window.__wpStartIdx = idx;
+				function writePreload(srcset, media) {
+					if (!srcset) return;
+					document.write(
+						'<link rel="preload" as="image" href="' + srcset.split(' ')[0] +
+						'" imagesrcset="' + srcset +
+						'" imagesizes="100vw" media="' + media + '" fetchpriority="high">'
+					);
+				}
+				writePreload(d[idx], '(min-width: 1024px)');
+				writePreload(m[idx], '(max-width: 1023px)');
+			})();
+		</script>
+	)}
+	<slot name="head" />
+</Fragment>
 <HeaderTopRow navbarMode={navbarMode} navbarWidthFull={navbarWidthFull} />
 
 <WallpaperSection state={banner} backgroundImages={backgroundImages} title={title} bannerPostMeta={bannerPostMeta} />

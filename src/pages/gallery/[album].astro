@@ -1,6 +1,7 @@
 ---
 import { Icon } from "astro-icon/components";
 import EncryptedContent from "@/components/features/EncryptedContent.astro";
+import Lightbox from "@/components/pages/gallery/Lightbox.astro";
 import PhotoCard from "@/components/pages/gallery/PhotoCard.astro";
 import { galleryConfig, siteConfig } from "@/config";
 import I18nKey from "@/i18n/i18nKey";
@@ -49,6 +50,9 @@ const coverLqipProps = cover
           src={cover}
           alt={albumMeta.name}
           class="w-full h-full object-cover opacity-0 transition-opacity duration-500 ease-out"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
         />
         <div class="absolute inset-0 bg-linear-to-t from-black/70 via-black/30 to-transparent" />
         <!-- 返回按钮 -->
@@ -162,5 +166,8 @@ const coverLqipProps = cover
       )}
     </div>
   </div>
+
+  <!-- 点击放大查看 -->
+  <Lightbox />
 
 </MainGridLayout>

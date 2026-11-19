@@ -86,11 +86,12 @@ const allTags = [...new Set(albums.flatMap((a) => a.tags || []))].sort();
     {albums.length > 0 ? (
       <>
         <div class="card-grid" style="--card-grid-min-width: 320px">
-          {albums.map((album) => (
+          {albums.map((album, i) => (
             <AlbumCard
               id={album.id}
               name={album.name}
               cover={album.cover}
+              priority={i < 2}
               description={album.description}
               date={album.date}
               location={album.location}

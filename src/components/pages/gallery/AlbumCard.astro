@@ -16,6 +16,8 @@ interface Props {
 	tags?: string[];
 	photoCount: number;
 	encrypted?: boolean;
+	// 网格前面的相册封面优先加载（首屏 LCP）
+	priority?: boolean;
 }
 
 const {
@@ -28,6 +30,7 @@ const {
 	tags,
 	photoCount,
 	encrypted,
+	priority = false,
 } = Astro.props;
 
 const detailUrl = url(`/gallery/${id}/`);
@@ -62,7 +65,8 @@ const coverClass = gridCoverFullWidth
           src={cover}
           alt={name}
           class="w-full h-full object-cover pointer-events-none opacity-0 transition-all duration-500 ease-out group-hover:scale-110"
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
+          fetchpriority={priority ? "high" : "auto"}
           decoding="async"
         />
       </>
