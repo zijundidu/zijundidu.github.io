@@ -255,6 +255,8 @@ pnpm install
 | 搜索不到新文章 | 索引随构建生成，push 后即更新 |
 | 改了配置没变化 | `pnpm dev` 有时需重启；确认 push 成功且 Actions 变绿；线上页面有最长约 10 分钟的缓存，强刷或稍等 |
 | 发布后归档/时间线/最后活动没立刻更新 | 同上：GitHub Pages 对 HTML 设了约 10 分钟的缓存（max-age=600），部署后稍等或 Ctrl+F5 强刷，属正常现象 |
+| Obsidian 里换行了，网页上连成一行 | Markdown 规范里单个换行只是空格（Obsidian 默认宽松显示）。站点已对齐 Obsidian：**单个换行直接显示为换行**，空行分段照旧 |
+| `---` 分隔符不显示 | 多半是缓存（见上条强刷）。注意写法：`---` 的**上下都要留空行**——紧跟文字行时 Markdown 会把它当成"标题下划线"吞掉 |
 | 想换回纯色无背景 | `backgroundWallpaper.ts` 的 `mode: "none"` |
 | 访问统计数字不显示 | 多刷新几次；数字异步填充有 1-2 秒延迟；广告拦截插件可能拦截 vercount.one |
 | 本地 `pnpm build` 报 `CannotFetchFontFile`（cdn.jsdelivr.net） | 构建时下载的字体缓存在 `node_modules/.astro/fonts`，**不要删 `node_modules/.astro` 目录**；缓存被删后本地因网络访问不了 jsdelivr 会失败，属本地现象，CI 不受影响，push 后 Actions 会正常变绿 |
