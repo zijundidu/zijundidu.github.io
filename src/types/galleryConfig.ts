@@ -13,17 +13,6 @@ export type GalleryAlbum = {
 
 // 相册配置
 export type GalleryConfig = {
-	albums: GalleryAlbum[
-		{
-  			id: "gannan-260715",              # 必须和目录名一致
-  			name: "甘南自驾",
-  			description: "2026 年甘南自驾精彩瞬间",
-    		location: "甘南藏族自治州",
-    		date: "2026-07-15",            # 用于排序
-  			tags: ["旅行", "自驾"],         # 相册页可按标签筛选
-  			# password: "123",             # 可选，加密相册
-  			# passwordHint: "提示语",
-},
-	];
+	albums: GalleryAlbum[];
 	columnWidth?: number; // 瀑布流最小列宽(px)，默认 240，浏览器根据容器宽度自动计算列数
 };
