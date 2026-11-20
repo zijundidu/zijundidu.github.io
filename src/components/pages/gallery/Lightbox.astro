@@ -86,9 +86,13 @@
 		}
 
 		function close() {
-			if (!boxEl) return;
-			boxEl.classList.add("hidden");
-			boxEl.classList.remove("flex");
+			// 每次从文档里现找：Swup 切页可能替换过 DOM，存量的引用可能已脱离文档，
+			// 对旧节点操作会让可见的灯箱盖着页面关不掉（"关闭后仍有覆盖"）
+			var live = document.getElementById("gallery-lightbox") || boxEl;
+			if (live) {
+				live.classList.add("hidden");
+				live.classList.remove("flex");
+			}
 			document.body.style.overflow = "";
 			if (lastFocus && lastFocus.focus) lastFocus.focus();
 		}

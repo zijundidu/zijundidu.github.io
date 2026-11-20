@@ -5,9 +5,11 @@ interface Props {
 	src: string;
 	albumId: string;
 	alt?: string;
+	// 构建时读取的真实宽高，用于预留 aspect-ratio 空间（防懒加载布局抖动）
+	aspect?: { w: number; h: number };
 }
 
-const { src, albumId, alt = "" } = Astro.props;
+const { src, albumId, alt = "", aspect } = Astro.props;
 
 // LQIP 渐变占位
 const lqipProps = getLqipProps(src, undefined, true);
@@ -19,6 +21,7 @@ const lqipProps = getLqipProps(src, undefined, true);
     data-src={src}
     data-type="image"
     class="block rounded-xl overflow-hidden relative group cursor-pointer"
+    style={aspect ? `aspect-ratio: ${aspect.w} / ${aspect.h};` : undefined}
   >
     <div class="lqip-placeholder absolute inset-0 pointer-events-none" style={lqipProps.style} aria-hidden="true"></div>
     <img

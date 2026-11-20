@@ -11,6 +11,8 @@ import "@/styles/pages/gallery-album.css";
 import { getAlbumCover, scanAlbumPhotos } from "@/utils/gallery-utils";
 import { getLqipProps } from "@/utils/lqip-utils";
 import { url } from "@/utils/url-utils";
+import path from "node:path";
+import sharp from "sharp";
 
 // 检查页面是否启用
 if (!siteConfig.pages.gallery) {
@@ -33,6 +35,22 @@ if (!albumMeta) {
 const photos = scanAlbumPhotos(albumMeta.id);
 const cover = getAlbumCover(albumMeta, photos);
 const columnWidth = galleryConfig.columnWidth || 240;
+
+// 构建时读取每张照片的真实宽高，给卡片预留 aspect-ratio 空间。
+// 否则懒加载的图片加载前高度为 0，CSS 多列会不断重排——
+// 表现为"有的图先出来有的后出来、布局乱跳"。
+const photoDims = new Map<string, { w: number; h: number }>();
+await Promise.all(
+	photos.map(async (p) => {
+		if (!p.startsWith("/")) return; // urls.txt 远程图不处理
+		try {
+			const m = await sharp(path.join(process.cwd(), "public", p)).metadata();
+			if (m.width && m.height) photoDims.set(p, { w: m.width, h: m.height });
+		} catch {
+			/* 读不到就不预留，退回原有行为 */
+		}
+	}),
+);
 
 // LQIP 渐变占位
 const coverLqipProps = cover
@@ -144,7 +162,7 @@ const coverLqipProps = cover
               style={`column-count: 2; column-gap: 0.75rem; --col-width: ${columnWidth}px;`}
             >
               {photos.map((photo) => (
-                <PhotoCard src={photo} albumId={albumMeta.id} />
+                <PhotoCard src={photo} albumId={albumMeta.id} aspect={photoDims.get(photo)} />
               ))}
             </div>
           </EncryptedContent>
@@ -154,7 +172,7 @@ const coverLqipProps = cover
             style={`column-count: 2; column-gap: 0.75rem; --col-width: ${columnWidth}px;`}
           >
             {photos.map((photo) => (
-              <PhotoCard src={photo} albumId={albumMeta.id} />
+              <PhotoCard src={photo} albumId={albumMeta.id} aspect={photoDims.get(photo)} />
             ))}
           </div>
         )

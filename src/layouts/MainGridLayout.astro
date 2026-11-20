@@ -145,6 +145,11 @@ const wallpaperPreload = await (async () => {
 	{wallpaperPreload && (
 		<script is:inline define:vars={{ wallpaperPreload }} data-swup-ignore-script>
 			(function () {
+				// define:vars 构建时可能丢失 data-swup-ignore-script，Swup 切页会重跑 head 脚本；
+				// 加载后再执行 document.write 会清空整个文档（跳转变慢、页面错乱的元凶）。
+				// 用一次性标志兜底：只有解析期的首次运行真正写 preload。
+				if (window.__wpPreloadDone) return;
+				window.__wpPreloadDone = true;
 				var d = wallpaperPreload.desktop;
 				var m = wallpaperPreload.mobile;
 				var idx = Math.floor(Math.random() * d.length);
