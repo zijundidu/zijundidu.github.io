@@ -31,7 +31,7 @@ Kraken 的个人主页，基于 **Astro 7 + Firefly 主题**（[CuteLeaf/Firefly
 - **头像自动同步**：`.github/workflows/sync-avatar.yml` 每周一把 GitHub 头像下载转为 `public/images/avatar.jpg` 并提交（有变化才提交，提交触发部署）；手动同步见 MAINTENANCE.md 5.9
 - **时间口径**：全站北京时间。`siteConfig.timezone`（Asia/Shanghai）控制显示；动态 frontmatter 时间必须带 `+08:00`，无偏移会被 YAML 按 UTC 解析
 - **导航栏切图按钮**：`#bg-wallpaper-next` 派发 `bannerCarouselNext` 事件，壁纸轮播脚本（WallpaperSection）监听并切下一张；背景视频功能已移除
-- **壁纸首屏预加载**：背景图 markup 在 body 中后部（template+脚本实例化），`<head>` 里的预加载脚本提前发起请求（document.write 媒体门控 preload，随机下标存 `window.__wpStartIdx`，壁纸脚本实例化同一张）；改壁纸管线时注意 URL 必须与 getImage 产物一致
+- **壁纸首屏预加载**：背景图 markup 在 body 中后部（template+脚本实例化），`<head>` 里的预加载脚本提前发起请求（document.write 媒体门控 preload，随机下标存 `window.__wpStartIdx`，壁纸脚本实例化同一张）；改壁纸管线时注意 URL 必须与 getImage 产物一致。**define:vars 脚本会丢失 `data-swup-ignore-script`（Swup 每次切页重跑 head 脚本）**，任何用 document.write 的 head 脚本必须自带 `window.__xxxDone` 幂等守卫，否则加载后执行会清空整个文档
 - **相册灯箱是自研零依赖组件**（`src/components/pages/gallery/Lightbox.astro`，入口是 PhotoCard 的 `data-fancybox`/`data-src` 标记）——fancybox 从未安装，勿引 fancybox 依赖
 
 ## 已删除的功能（2026-10-13 多轮清理，git 历史可找回）

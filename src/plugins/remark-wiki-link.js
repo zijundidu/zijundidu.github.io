@@ -11,9 +11,11 @@ import matter from "gray-matter";
 import { getApiUrlList, processCoverImageSync } from "../utils/image-utils";
 
 const POSTS_DIR = fileURLToPath(new URL("../content/posts/", import.meta.url));
+const PUBLIC_IMAGE_DIRS = ["public/gallery", "public/images"];
 const MARKDOWN_EXTENSION = /\.(?:md|mdx|markdown)$/i;
 const WIKI_LINK = /!?\[\[([^[\]\n]+)\]\]/g;
 const STANDALONE_WIKI_LINK = /^\[\[([^[\]\n]+)\]\]$/;
+const IMAGE_FILE = /\.(?:jpe?g|png|webp|avif|gif)$/i;
 const SKIPPED_NODE_TYPES = new Set([
 	"link",
 	"linkReference",
@@ -22,6 +24,70 @@ const SKIPPED_NODE_TYPES = new Set([
 ]);
 
 const frontmatterCache = new Map();
+
+// public 图片索引（构建期一次）：文件名/相对路径 → URL。
+// 让 Obsidian 的 ![[IMG_xxx.jpg]] 图片嵌入在博客里也能用——
+// Obsidian 按全库文件名解析，博客同样按文件名在 public/gallery、public/images 里找。
+let publicImageIndex = null;
+
+function buildPublicImageIndex() {
+	if (publicImageIndex) return publicImageIndex;
+	const byBase = new Map();
+	const byPath = new Map();
+	const walk = (dir) => {
+		let entries;
+		try {
+			entries = readdirSync(dir, { withFileTypes: true });
+		} catch {
+			return;
+		}
+		for (const entry of entries) {
+			const full = path.join(dir, entry.name);
+			if (entry.isDirectory()) {
+				walk(full);
+				continue;
+			}
+			if (!IMAGE_FILE.test(entry.name)) continue;
+			const rel = full.replaceAll("\\", "/").replace(/^public\//, "");
+			const urlPath = `/${rel}`;
+			if (!byBase.has(entry.name)) byBase.set(entry.name, urlPath);
+			byPath.set(rel, urlPath);
+		}
+	};
+	for (const dir of PUBLIC_IMAGE_DIRS) walk(dir);
+	publicImageIndex = { byBase, byPath };
+	return publicImageIndex;
+}
+
+/**
+ * 解析 ![[target]] 图片嵌入的 target → { url, width?, alt? }。
+ * 支持：![[文件名]]（在 public/gallery、public/images 里按文件名找）、
+ * ![[相对/绝对路径]]、![[文件名|说明]]（alt）、![[文件名|400]]（宽）。
+ * 找不到返回 null（调用方保留原文，页面上能看到待修标记）。
+ */
+function resolveImageEmbed(raw) {
+	const sep = raw.indexOf("|");
+	const target = (sep === -1 ? raw : raw.slice(0, sep)).trim();
+	const extra = sep === -1 ? "" : raw.slice(sep + 1).trim();
+	if (!target || !IMAGE_FILE.test(target)) return null;
+
+	const { byBase, byPath } = buildPublicImageIndex();
+	const normalized = target.replaceAll("\\", "/").replace(/^\.?\//, "").replace(/^public\//, "");
+	let urlPath = byPath.get(normalized) ?? byBase.get(path.basename(normalized));
+	// 相册 PNG 照片压缩时转成了 JPEG（同名 .jpg），给旧引用兜底
+	if (!urlPath && /\.png$/i.test(normalized)) {
+		const jpg = normalized.replace(/\.png$/i, ".jpg");
+		urlPath = byPath.get(jpg) ?? byBase.get(path.basename(jpg));
+	}
+	if (!urlPath) return null;
+
+	const result = { url: urlPath };
+	if (extra) {
+		if (/^\d{2,5}$/.test(extra)) result.width = Number(extra);
+		else result.alt = extra;
+	}
+	return result;
+}
 
 function normalizeContentPath(value) {
 	const contentPath = value
@@ -492,7 +558,29 @@ function replaceWikiLinks(value) {
 	let changed = false;
 
 	for (const match of value.matchAll(WIKI_LINK)) {
+		// ![[xxx]] 图片嵌入：解析成真正的 <img>（Obsidian 写法直通博客）。
+		// 解析不出来（找不到文件、不是图片）就保留原文，页面上能看到待修标记
 		if (match[0].startsWith("!")) {
+			const embed = resolveImageEmbed(match[1]);
+			if (!embed) continue;
+			const index = match.index;
+			if (index > cursor) {
+				children.push({ type: "text", value: value.slice(cursor, index) });
+			}
+			children.push({
+				type: "image",
+				url: embed.url,
+				alt: embed.alt ?? "",
+				data: {
+					hProperties: {
+						loading: "lazy",
+						decoding: "async",
+						...(embed.width ? { width: embed.width } : {}),
+					},
+				},
+			});
+			cursor = index + match[0].length;
+			changed = true;
 			continue;
 		}
 
